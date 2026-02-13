@@ -19,6 +19,8 @@ model User {
   session Session[]
   account Account[]
 
+  connections Connection[]
+
   @@map("user")
 }
 
@@ -56,14 +58,34 @@ model Account {
 }
 
 model Verification {
-  id         String    @id @default(cuid())
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime?
-  updatedAt  DateTime?
+  id                String          @id @default(cuid())
+  identifier        String
+  value             String
+  expiresAt         DateTime
+  createdAt         DateTime?
+  updatedAt         DateTime?
 
   @@map("verification")
+}
+
+model Connection {
+  id                String          @id @default(cuid())
+  connectionName    String          @map("connection_name")
+  type              DbType
+  connectionUrl     String          @map("connection_url") // Encrypted string
+  iv                String // For AES-256-GCM decryption
+
+  host              String?
+  port              Int?
+  database          String?
+  username          String?
+  lastConnected     DateTime?       @map("last_connected")
+  createdAt         DateTime        @default(now())
+
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade) 
+
+  @@map("connections")
 }
 
 enum Role {
