@@ -14,5 +14,5 @@ export abstract class DatabaseAdapter {
   abstract diconnect(): Promise<void>;
 
   // Utility methods
-  protected buildConnectionString(config: ConnectionConfig): string;
+  protected abstract buildConnectionString(config: ConnectionConfig): string;
 }

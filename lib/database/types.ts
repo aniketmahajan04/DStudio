@@ -64,10 +64,10 @@ interface ConnectionConfig {
   type: DatabaseType;
   host?: string;
   port?: number;
-  database: string;
-  username: string;
-  password: string;
-  connectionString: string;
+  database?: string;
+  username?: string;
+  password?: string;
+  connectionString?: string;
   ssl?: boolean;
 }
 

@@ -21,7 +21,7 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
     try {
       const sql = postgres(this.connectionString, { connect_timeout: 5 });
       await sql`SELECT 1`;
-      sql.end();
+      await sql.end();
 
       return { success: true };
     } catch (err: any) {

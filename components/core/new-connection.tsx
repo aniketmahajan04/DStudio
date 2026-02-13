@@ -20,6 +20,9 @@ import { Form } from "../ui/form";
 import { Field, FieldLabel, FieldError } from "../ui/field";
 import { Input } from "../ui/input";
 import { useState } from "react";
+import { testConnectionToDatabase } from "@/app/api/actions/database-actions";
+import { toastManager } from "../ui/toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 type DatabaseType = "POSTGRES" | "MYSQL" | "SQLITE";
 
@@ -32,15 +35,59 @@ function NewConnection({
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [selectedDbType, setSelectedDbType] = useState<DatabaseType | null>(
-    null,
-  );
+  const [selectedDbType, setSelectedDbType] =
+    useState<DatabaseType>("POSTGRES");
+  const [connectionMode, setConnectionMode] = useState<"fields" | "uri">("uri");
   const [connectionName, setConnectionName] = useState("");
-  const [port, setPort] = useState("");
+  const [port, setPort] = useState<number | undefined>(undefined);
   const [host, setHost] = useState("");
   const [databaseUsername, setDatabaseUsername] = useState("");
   const [databaseName, setDatabaseName] = useState("");
   const [databasePassword, setDatabasePassword] = useState("");
+  // Connection string
+  const [connectionString, setConnectionString] = useState("");
+
+  const handleTestConnection = () => {
+    const connectionConfig =
+      connectionMode === "uri"
+        ? {
+            type: selectedDbType,
+            connectionString,
+          }
+        : {
+            type: selectedDbType,
+            port,
+            host,
+            database: databaseName,
+            username: databaseUsername,
+            password: databasePassword,
+          };
+    toastManager.promise(
+      testConnectionToDatabase(connectionConfig).then((result) => {
+        console.log("RESULT:", result);
+
+        if (!result.success) {
+          throw new Error(result.error || "Connection failed.");
+        }
+
+        return "Connection successful!";
+      }),
+      {
+        loading: {
+          title: "Testing connection",
+          description: "Please wait while we are connecting to you database.",
+        },
+        success: (message: string) => ({
+          title: "Connection Successful 🎉",
+          description: message,
+        }),
+        error: (error: Error) => ({
+          title: "Connection Failed ❌",
+          description: error.message || "Something went wrong",
+        }),
+      },
+    );
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -134,70 +181,118 @@ function NewConnection({
             </Field>
             {selectedDbType !== "SQLITE" && (
               <>
-                <div className="flex items-center gap-4">
-                  <Field className="gap-4">
-                    <FieldLabel className="tracking-wider">Host</FieldLabel>
-                    <Input
-                      name="host"
-                      type="text"
-                      placeholder="Host"
-                      className="py-2"
-                      onChange={(e) => setHost(e.target.value)}
-                    />
-                  </Field>
+                <Tabs
+                  value={connectionMode}
+                  onValueChange={(v) =>
+                    setConnectionMode(v as "fields" | "uri")
+                  }
+                  className="w-full"
+                >
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="uri">Connection String</TabsTrigger>
+                    <TabsTrigger value="fields">Individual Fields</TabsTrigger>
+                  </TabsList>
 
-                  <Field className="gap-4">
-                    <FieldLabel>Port</FieldLabel>
-                    <Input
-                      name="port"
-                      type="text"
-                      placeholder="Port"
-                      className="py-2"
-                      onChange={(e) => setPort(e.target.value)}
-                    />
-                  </Field>
-                </div>
+                  {/* Connection String Tab */}
+                  <TabsContent value="uri" className="space-y-4">
+                    <Field className="gap-4">
+                      <FieldLabel className="tracking-wider">
+                        Connection String (URI)
+                      </FieldLabel>
+                      <Input
+                        value={connectionString}
+                        onChange={(e) => setConnectionString(e.target.value)}
+                        name="connectionString"
+                        type="text"
+                        placeholder="postgresql://username:password@host:port/database?sslmode=require"
+                        className="py-2 font-mono text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Paste your full connection string from your database
+                        provider (Neon, Supabase, Railway, etc.)
+                      </p>
+                    </Field>
+                  </TabsContent>
 
-                <Field className="gap-4">
-                  <FieldLabel className="tracking-wider">Username</FieldLabel>
-                  <Input
-                    name="username"
-                    type="text"
-                    placeholder="Username"
-                    className="py-2"
-                    onChange={(e) => setDatabaseUsername(e.target.value)}
-                  />
-                </Field>
+                  <TabsContent value="fields" className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <Field className="gap-4">
+                        <FieldLabel className="tracking-wider">Host</FieldLabel>
+                        <Input
+                          name="host"
+                          type="text"
+                          placeholder="Host"
+                          className="py-2"
+                          onChange={(e) => setHost(e.target.value)}
+                        />
+                      </Field>
 
-                <Field className="gap-4">
-                  <FieldLabel className="tracking-wider">
-                    Database Name
-                  </FieldLabel>
-                  <Input
-                    name="database name"
-                    type="text"
-                    placeholder="Database name"
-                    className="py-2"
-                    onChange={(e) => setDatabaseName(e.target.value)}
-                  />
-                </Field>
+                      <Field className="gap-4">
+                        <FieldLabel>Port</FieldLabel>
+                        <Input
+                          name="port"
+                          type="number"
+                          placeholder="Port"
+                          className="py-2"
+                          onChange={(e) =>
+                            setPort(
+                              e.target.value
+                                ? Number(e.target.value)
+                                : undefined,
+                            )
+                          }
+                        />
+                      </Field>
+                    </div>
 
-                <Field className="gap-4">
-                  <FieldLabel className="tracking-wider">Password</FieldLabel>
-                  <Input
-                    name="Password"
-                    type="text"
-                    placeholder="Password"
-                    className="py-2"
-                    onChange={(e) => setDatabasePassword(e.target.value)}
-                  />
-                </Field>
+                    <Field className="gap-4">
+                      <FieldLabel className="tracking-wider">
+                        Username
+                      </FieldLabel>
+                      <Input
+                        name="username"
+                        type="text"
+                        placeholder="Username"
+                        className="py-2"
+                        onChange={(e) => setDatabaseUsername(e.target.value)}
+                      />
+                    </Field>
+
+                    <Field className="gap-4">
+                      <FieldLabel className="tracking-wider">
+                        Database Name
+                      </FieldLabel>
+                      <Input
+                        name="database name"
+                        type="text"
+                        placeholder="Database name"
+                        className="py-2"
+                        onChange={(e) => setDatabaseName(e.target.value)}
+                      />
+                    </Field>
+
+                    <Field className="gap-4">
+                      <FieldLabel className="tracking-wider">
+                        Password
+                      </FieldLabel>
+                      <Input
+                        name="Password"
+                        type="text"
+                        placeholder="Password"
+                        className="py-2"
+                        onChange={(e) => setDatabasePassword(e.target.value)}
+                      />
+                    </Field>
+                  </TabsContent>
+                </Tabs>
               </>
             )}
           </Form>
         </div>
         <DialogFooter className="flex">
-          <Button className="py-4">Test Connection</Button>
+          <Button className="py-4" onClick={handleTestConnection}>
+            Test Connection
+          </Button>
           <Button className="py-4">Connect</Button>
         </DialogFooter>
       </DialogContent>

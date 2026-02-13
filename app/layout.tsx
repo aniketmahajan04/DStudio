@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import TopBar from "@/components/core/top-bar";
 import { SignIn } from "@/components/auth/sign-in";
 import { AuthSyncProvider } from "@/components/providers/AuthProviders";
+import { ToastProvider } from "@/components/ui/toast";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -34,9 +35,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthSyncProvider>
-            <TopBar />
-            <SignIn showTrigger={false} />
-            {children}
+            <ToastProvider>
+              <TopBar />
+              <SignIn showTrigger={false} />
+              {children}
+            </ToastProvider>
           </AuthSyncProvider>
         </ThemeProvider>
       </body>
