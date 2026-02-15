@@ -2,6 +2,7 @@ import Container from "@/components/core/Container";
 import SideBar from "@/components/core/side-bar";
 
 import { StatusLine } from "@/components/core/statusLine";
+import { MainContentBar } from "@/components/maincontent/main-content-bar";
 
 import { WorkspaceBar } from "@/components/workspace/workspace-bar";
 
@@ -42,7 +43,8 @@ export default async function DashboardPage() {
         <div className="flex-1 overflow-auto">
           {/* Editor, results, etc. */}
 
-          <div className="h-full bg-muted/20 flex items-center justify-center">
+          <div className="h-full bg-muted/20 flex flex-col">
+            <MainContentBar />
             <p className="text-muted-foreground">Main Content Area</p>
           </div>
         </div>

@@ -1,5 +1,5 @@
 "use client";
-import { Plus, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { NewConnection } from "../core/new-connection";

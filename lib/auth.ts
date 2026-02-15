@@ -15,6 +15,17 @@ const auth = betterAuth({
     provider: "postgresql",
   }),
 
+  user: {
+    additionalFields: {
+      role: {
+        type: ["USER", "ADMIN"],
+        required: false,
+        defaultValue: "USER",
+        input: false, // only set in DB, not by signup
+      },
+    },
+  },
+
   secret: process.env.BETTER_AUTH_SECRET as string,
   baseURL: process.env.BETTER_AUTH_URL as string,
 
