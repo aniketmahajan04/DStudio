@@ -1,4 +1,4 @@
-type DatabaseType = "POSTGRES" | "MYSQL" | "SQLITE";
+type DatabaseType = 'postgresql' | 'mysql' | 'sqlite';
 
 interface ColumnMetaData {
   name: string;

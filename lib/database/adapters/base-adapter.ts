@@ -1,4 +1,4 @@
-import { ConnectionConfig } from "../types";
+import {ConnectionConfig, DatabaseMetaData, SchemaMetaData, TableMetaData} from "../types";
 
 export abstract class DatabaseAdapter {
   protected connectionString: string;
@@ -15,4 +15,10 @@ export abstract class DatabaseAdapter {
 
   // Utility methods
   protected abstract buildConnectionString(config: ConnectionConfig): string;
+
+  // Schema discovery
+  abstract getDatabaseMetadata(): Promise<DatabaseMetaData>;
+  abstract getSchema(): Promise<SchemaMetaData[]>;
+  abstract getTables(schema: string): Promise<TableMetaData[]>;
+  abstract getTableSchema(schema: string, tableName: string): Promise<TableMetaData>
 }
