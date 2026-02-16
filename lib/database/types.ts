@@ -87,13 +87,82 @@ interface TableDataResponse {
   column: string[];
 }
 
+interface QueryResult {
+  rows: any[];
+  rowCount: number;
+  fields: string[];
+  executionTime?: number;
+}
+
+interface ConnectionSession {
+  id: string;
+  name: string;
+  config: ConnectionConfig;
+  connectedAt: Date;
+  lastActivity?: Date;
+}
+
+interface TableDataCacheEntry {
+  rows: any[];
+  totalCount: number;
+  columns: string[];
+  currentPage: number;
+  pageSize: number;
+  fetchedAt: Date;
+}
+
+interface TablePosition {
+  x: number;
+  y: number;
+}
+
+interface TableMetaDataWithUI extends TableMetaData {
+  ui?: TablePosition;
+}
+
+interface ActionResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+interface ConnectionTestResult {
+  success: boolean;
+  error?: string;
+  latency?: number;
+  serverVersion?: string;
+}
+
+interface MetadataFetchProgress {
+  stage:
+    | "connecting"
+    | "fetching_schemas"
+    | "fetching_tables"
+    | "fetching_details"
+    | "complete";
+  progress: string;
+  completeTables?: number;
+  totalTables?: number;
+}
+
 export type {
   DatabaseType,
   ColumnMetaData,
   ForeignKeyMetaData,
   IndexedMetaData,
+  CheckConstraintMetaData,
+  UniqueConstraintMetaData,
   TableMetaData,
   SchemaMetaData,
   DatabaseMetaData,
   ConnectionConfig,
+  TableDataResponse,
+  QueryResult,
+  ConnectionSession,
+  TableDataCacheEntry,
+  TablePosition,
+  TableMetaDataWithUI,
+  ActionResponse,
+  ConnectionTestResult,
+  MetadataFetchProgress,
 };
