@@ -1,4 +1,9 @@
-import {ConnectionConfig, DatabaseMetaData, SchemaMetaData, TableMetaData} from "../types";
+import {
+  ConnectionConfig,
+  DatabaseMetaData,
+  SchemaMetaData,
+  TableMetaData,
+} from "../types";
 
 export abstract class DatabaseAdapter {
   protected connectionString: string;
@@ -11,7 +16,7 @@ export abstract class DatabaseAdapter {
 
   // Connection Methods
   abstract testConnection(): Promise<{ success: boolean; error?: string }>;
-  abstract diconnect(): Promise<void>;
+  abstract disconnect(): Promise<void>;
 
   // Utility methods
   protected abstract buildConnectionString(config: ConnectionConfig): string;
@@ -20,5 +25,27 @@ export abstract class DatabaseAdapter {
   abstract getDatabaseMetadata(): Promise<DatabaseMetaData>;
   abstract getSchema(): Promise<SchemaMetaData[]>;
   abstract getTables(schema: string): Promise<TableMetaData[]>;
-  abstract getTableSchema(schema: string, tableName: string): Promise<TableMetaData>
+  abstract getTableSchema(
+    schema: string,
+    tableName: string,
+  ): Promise<TableMetaData>;
+
+  // Data fetching
+  abstract getTableData(
+    schema: string,
+    tableName: string,
+    page?: number,
+    pageSize?: number,
+  ): Promise<{
+    rows: any[];
+    totalCount: number;
+    columns: string[];
+  }>;
+
+  // Query execution
+  abstract executeQuery(query: string): Promise<{
+    rows: any[];
+    rowCount: number;
+    fields: string[];
+  }>;
 }

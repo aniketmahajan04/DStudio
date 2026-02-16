@@ -1,20 +1,20 @@
-type DatabaseType = 'postgresql' | 'mysql' | 'sqlite';
+type DatabaseType = "postgresql" | "mysql" | "sqlite";
 
 interface ColumnMetaData {
   name: string;
-  type: string;
-  nativeType: string;
+  type: string; // SQL data types (e.g., "varchar", "integer")
+  nativeType: string; // Database-specific typ
   nullable: boolean;
   defaultValue: string | null;
-  maxLenght?: number;
-  preciosion?: number;
-  scale?: number;
+  maxLenght?: number; // For string types
+  precision?: number; // For numeric type
+  scale?: number; // For numeric types
   isPrimaryKey: boolean;
   isForeignKey: boolean;
   isUnique: boolean;
-  isAutoIncreament: boolean;
-  comment?: string;
-  position: number;
+  isAutoIncrement: boolean;
+  comment?: string; // Column comment/description
+  position: number; // Ordinal position in table
 }
 
 interface ForeignKeyMetaData {
@@ -34,6 +34,16 @@ interface IndexedMetaData {
   type: string;
 }
 
+interface CheckConstraintMetaData {
+  name: string;
+  definition: string[];
+}
+
+interface UniqueConstraintMetaData {
+  name: string;
+  columns: string[];
+}
+
 interface TableMetaData {
   name: string;
   schema: string;
@@ -41,9 +51,9 @@ interface TableMetaData {
   columns: ColumnMetaData[];
   primaryKey: string[];
   foreignKey: ForeignKeyMetaData[];
-  uniqueConstraints: { name: string; columns: string[] }[];
+  uniqueConstraints: UniqueConstraintMetaData[];
   indexes: IndexedMetaData[];
-  checkConstraints?: { name: string; definition: string[] }[];
+  checkConstraints?: CheckConstraintMetaData[];
   rowCount?: number;
   size?: number;
   comment?: string;
@@ -69,6 +79,12 @@ interface ConnectionConfig {
   password?: string;
   connectionString?: string;
   ssl?: boolean;
+}
+
+interface TableDataResponse {
+  rows: any[];
+  totalCount: number;
+  column: string[];
 }
 
 export type {

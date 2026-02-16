@@ -1,5 +1,10 @@
 import postgres from "postgres";
-import { ConnectionConfig, DatabaseMetaData, SchemaMetaData } from "../types";
+import {
+  ConnectionConfig,
+  DatabaseMetaData,
+  SchemaMetaData,
+  TableMetaData,
+} from "../types";
 import { DatabaseAdapter } from "./base-adapter";
 
 export class PostgreSQLAdapter extends DatabaseAdapter {
@@ -29,7 +34,7 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
     }
   }
 
-  diconnect(): Promise<void> {
+  disconnect(): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
@@ -37,19 +42,20 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
     const sql = postgres(this.connectionString, {
       ssl: this.config.ssl ? "require" : undefined,
     });
+    try {
+      const versionResult = await sql`SELECT version()`;
+      const version = versionResult[0].version;
 
-    const versionResult = await sql`SELECT version()`;
-    const version = versionResult[0].version;
+      const schemas = await this.getSchema();
 
-    const schemas = await this.getSchema();
-
-    await sql.end();
-
-    return {
-      type: "postgresql",
-      version,
-      schemas,
-    };
+      return {
+        type: "postgresql",
+        version,
+        schemas,
+      };
+    } finally {
+      await sql.end();
+    }
   }
 
   async getSchema(): Promise<SchemaMetaData[]> {
@@ -57,7 +63,8 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
       ssl: this.config.ssl ? "require" : undefined,
     });
 
-    const schemaRows = await sql`
+    try {
+      const schemaRows = await sql`
     SELECT 
       schema_name,
       (SELECT COUNT(*)
@@ -69,34 +76,63 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
     ORDER BY schema_name
     `;
 
-    const schemas: SchemaMetaData[] = [];
+      const schemas: SchemaMetaData[] = [];
 
-    for (const rows of schemaRows) {
-      const tables = await sql`
+      for (const row of schemaRows) {
+        const tables = await sql`
         SELECT 
-          table_name,
-          table_type,
-          (SELECT n_live_tup
-          FROM pg_stat_user_tables
-          WHERE schemaname = ${rows.schema_name}
-          AND relname = t.table_name) as row_count
+          t.table_name,
+          t.table_type,
+          COALESCE(s.n_live_tup, 0) as row_count
         FROM information_schema.tables t
-        WHERE table_schema = ${rows.schema_name}
-        AND table_type IN ('BASE TABLE', 'VIEW')
+        LEFT JOIN pg_stat_user_tables s
+          ON s.schemaname = ${row.schema_name}
+          AND s.relname = t.table_name
+        WHERE t.table_schema = ${row.schema_name}
+        AND t.table_type IN ('BASE TABLE', 'VIEW')
+        ORDER BY t.table_name
+      `;
+
+        schemas.push({
+          name: row.schema_name,
+          tables: tables.map((t) => ({
+            name: t.table_name,
+            type: t.table_type,
+            rowCount: t.row_count ? parseInt(t.row_count) : undefined,
+          })),
+        });
+      }
+
+      return schemas;
+    } finally {
+      await sql.end();
+    }
+  }
+
+  async getTables(schema: string): Promise<TableMetaData[]> {
+    const sql = postgres(this.connectionString, {
+      ssl: this.config.ssl ? "require" : undefined,
+    });
+
+    try {
+      const tables = await sql`
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = ${schema}
+        AND table_type = 'BASE TYPE'
         ORDER BY table_name
       `;
 
-      schemas.push({
-        name: rows.schema_name,
-        tables: tables.map((t) => ({
-          name: t.table_name,
-          type: t.table_type,
-          rowCount: t.row_count ? parseInt(t.row_count) : undefined,
-        })),
-      });
-    }
+      const tableMetaData: TableMetaData[] = [];
 
-    await sql.end();
-    return schemas;
+      for (const table of tableMetaData) {
+        const metaData = await this.getTableSchema(schema, table.table_name);
+        tableMetaData.push(metaData);
+      }
+
+      return tableMetaData;
+    } finally {
+      await sql.end();
+    }
   }
 }

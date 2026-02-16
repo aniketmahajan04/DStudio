@@ -23,8 +23,7 @@ import { useState } from "react";
 import { testConnectionToDatabase } from "@/app/api/actions/database-actions";
 import { toastManager } from "../ui/toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-
-type DatabaseType = "POSTGRES" | "MYSQL" | "SQLITE";
+import { DatabaseType } from "@/lib/database/types";
 
 function NewConnection({
   triggerLabel,
@@ -36,7 +35,7 @@ function NewConnection({
   onOpenChange: (open: boolean) => void;
 }) {
   const [selectedDbType, setSelectedDbType] =
-    useState<DatabaseType>("POSTGRES");
+    useState<DatabaseType>("postgresql");
   const [connectionMode, setConnectionMode] = useState<"fields" | "uri">("uri");
   const [connectionName, setConnectionName] = useState("");
   const [port, setPort] = useState<number | undefined>(undefined);
@@ -134,7 +133,7 @@ function NewConnection({
               </FieldLabel>
               <div className="flex items-center gap-20">
                 <Button
-                  onClick={() => setSelectedDbType("POSTGRES")}
+                  onClick={() => setSelectedDbType("postgresql")}
                   variant="outline"
                   className="px-4 py-6"
                 >
@@ -148,7 +147,7 @@ function NewConnection({
                   PostgreSQL
                 </Button>
                 <Button
-                  onClick={() => setSelectedDbType("MYSQL")}
+                  onClick={() => setSelectedDbType("mysql")}
                   variant="outline"
                   className="px-4 py-6"
                   disabled
@@ -163,7 +162,7 @@ function NewConnection({
                   MySql
                 </Button>
                 <Button
-                  onClick={() => setSelectedDbType("SQLITE")}
+                  onClick={() => setSelectedDbType("sqlite")}
                   variant="outline"
                   className="px-4 py-6"
                   disabled
@@ -179,7 +178,7 @@ function NewConnection({
                 </Button>
               </div>
             </Field>
-            {selectedDbType !== "SQLITE" && (
+            {selectedDbType !== "sqlite" && (
               <>
                 <Tabs
                   value={connectionMode}
