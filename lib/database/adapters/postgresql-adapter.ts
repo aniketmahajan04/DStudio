@@ -390,4 +390,62 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
       await sql.end();
     }
   }
+
+  async getTableData(
+    schema: string,
+    tableName: string,
+    page?: number,
+    pageSize?: number,
+  ): Promise<{ rows: any[]; totalCount: number; columns: string[] }> {
+    const sql = postgres(this.connectionString, {
+      ssl: this.config.ssl ? "require" : undefined,
+    });
+
+    try {
+      const currentPage = page ?? 1;
+      const currentPageSize = pageSize ?? 50;
+      const offset = (currentPage - 1) * currentPageSize;
+
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM ${sql(schema)}.${sql(tableName)}
+      `;
+
+      const totalCount = Number(countResult[0].count);
+
+      const rows = await sql`
+        SELECT * FROM ${sql(schema)}.${sql(tableName)} 
+        LIMIT ${currentPageSize} OFFSET ${offset}
+        `;
+
+      const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+
+      return {
+        rows,
+        totalCount,
+        columns,
+      };
+    } finally {
+      await sql.end();
+    }
+  }
+
+  async executeQuery(
+    query: string,
+  ): Promise<{ rows: any[]; rowCount: number; fields: string[] }> {
+    const sql = postgres(this.connectionString, {
+      ssl: this.config.ssl ? "require" : undefined,
+    });
+
+    try {
+      const result = await sql.unsafe(query);
+
+      return {
+        rows: result,
+        rowCount: result.length,
+        fields: result.length > 0 ? Object.keys(result[0]) : [],
+      };
+    } finally {
+      await sql.end();
+    }
+  }
 }
