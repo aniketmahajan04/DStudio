@@ -8,31 +8,30 @@ if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length !== 64) {
 }
 
 export interface EncryptedData {
-  encrypted: string;
+  encryptedUrl: string;
   iv: string;
-  authTag: string;
 }
 
-function encrypt(text: string): EncryptedData {
+function encryptConnectionUrl(url: string): EncryptedData {
   const iv = crypto.randomBytes(16);
   const key = Buffer.from(ENCRYPTION_KEY, "hex");
 
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
 
-  let encrypted = cipher.update(text, "utf-8", "hex");
+  let encrypted = cipher.update(url, "utf-8", "hex");
 
   encrypted += cipher.final("hex");
 
   const authTag = cipher.getAuthTag();
-
+  const encryptedUrl = encrypted + ":" + authTag.toString("hex");
   return {
-    encrypted,
+    encryptedUrl,
     iv: iv.toString("hex"),
-    authTag: authTag.toString("hex"),
   };
 }
 
-function decrypt(encrypted: string, iv: string, authTag: string): string {
+function decryptConnectionUrl(encryptedUrl: string, iv: string): string {
+  const [encrypted, authTagHex] = encryptedUrl.split(":");
   const key = Buffer.from(ENCRYPTION_KEY, "hex");
   const decipher = crypto.createDecipheriv(
     ALGORITHM,
@@ -40,26 +39,12 @@ function decrypt(encrypted: string, iv: string, authTag: string): string {
     Buffer.from(iv, "hex"),
   );
 
-  decipher.setAuthTag(Buffer.from(authTag, "hex"));
+  decipher.setAuthTag(Buffer.from(authTagHex, "hex"));
 
-  let decrypt = decipher.update(encrypted, "hex", "utf-8");
-  decrypt += decipher.final("utf-8");
+  let decrypted = decipher.update(encrypted, "hex", "utf-8");
+  decrypted += decipher.final("utf-8");
 
-  return decrypt;
+  return decrypted;
 }
 
-function encryptConnectionData(data: any): EncryptedData {
-  const jsonString = JSON.stringify(data);
-  return encrypt(jsonString);
-}
-
-function decryptConnectionData(
-  encrypted: string,
-  iv: string,
-  authTag: string,
-): any {
-  const jsonString = decrypt(encrypted, iv, authTag);
-  return JSON.parse(jsonString);
-}
-
-export { encrypt, decrypt, encryptConnectionData, decryptConnectionData };
+export { encryptConnectionUrl, decryptConnectionUrl };

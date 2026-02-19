@@ -1,7 +1,11 @@
 "use server";
 
 import { DatabaseAdapterFactory } from "@/lib/database/adapter-factory";
-import { ConnectionConfig } from "@/lib/database/types";
+import {
+  ConnectionConfig,
+  DatabaseMetaData,
+  TableMetaData,
+} from "@/lib/database/types";
 
 async function testConnectionToDatabase(config: ConnectionConfig) {
   try {
@@ -18,6 +22,25 @@ async function testConnectionToDatabase(config: ConnectionConfig) {
 
     return { success: true };
   } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+async function saveConnectionAndFetchMetadata(
+  connectionName: string,
+  config: ConnectionConfig,
+): Promise<{
+  success: boolean;
+  data?: {
+    connectionId: string;
+    metadata: DatabaseMetaData;
+    tableDetails: TableMetaData[];
+  };
+  error?: string;
+}> {
+  try {
+  } catch (err: any) {
+    console.error("Save connection error:", err);
     return { success: false, error: err.message };
   }
 }
