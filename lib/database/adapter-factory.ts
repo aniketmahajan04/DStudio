@@ -5,13 +5,13 @@ import { ConnectionConfig, DatabaseType } from "./types";
 export class DatabaseAdapterFactory {
   static createAdapter(config: ConnectionConfig): DatabaseAdapter {
     switch (config.type) {
-      case "POSTGRES":
+      case "postgresql":
         return new PostgreSQLAdapter(config);
 
-      case "MYSQL":
+      case "mysql":
         throw new Error("Mysql adapter not yet implemented.");
 
-      case "SQLITE":
+      case "sqlite":
         throw new Error("SQLite adapter not yet implemented.");
       default:
         throw new Error(`Unsupported databse type: ${config.type}`);
@@ -19,6 +19,6 @@ export class DatabaseAdapterFactory {
   }
 
   static getSupportedDatabases(): DatabaseType[] {
-    return ["POSTGRES", "MYSQL", "SQLITE"];
+    return ["postgresql", "mysql", "sqlite"];
   }
 }

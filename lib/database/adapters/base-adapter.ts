@@ -19,7 +19,7 @@ export abstract class DatabaseAdapter {
   abstract disconnect(): Promise<void>;
 
   // Utility methods
-  protected abstract buildConnectionString(config: ConnectionConfig): string;
+  abstract buildConnectionString(config: ConnectionConfig): string;
 
   // Schema discovery
   abstract getDatabaseMetadata(): Promise<DatabaseMetaData>;

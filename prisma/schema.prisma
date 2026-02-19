@@ -75,10 +75,6 @@ model Connection {
   connectionUrl     String          @map("connection_url") // Encrypted string
   iv                String // For AES-256-GCM decryption
 
-  host              String?
-  port              Int?
-  database          String?
-  username          String?
   lastConnected     DateTime?       @map("last_connected")
   createdAt         DateTime        @default(now())
 

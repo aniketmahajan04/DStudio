@@ -15,7 +15,7 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
     super(config);
   }
 
-  protected buildConnectionString(config: ConnectionConfig): string {
+  buildConnectionString(config: ConnectionConfig): string {
     if (config.connectionString) return config.connectionString;
 
     const { username, password, database, host, port, ssl } = config;

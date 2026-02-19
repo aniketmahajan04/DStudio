@@ -37,9 +37,7 @@ const auth = betterAuth({
   },
 
   // Set default redirect URL after sign in
-  trustedOrigins: [
-    process.env.BETTER_AUTH_URL || "http://localhost:3000",
-  ],
+  trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:3000"],
 });
 
-export { auth };
+export { auth, prisma };
