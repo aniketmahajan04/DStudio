@@ -8,7 +8,6 @@ import {
   DatabaseMetaData,
   TableMetaData,
 } from "@/lib/database/types";
-import { adapter } from "next/dist/server/web/adapter";
 
 async function testConnectionToDatabase(config: ConnectionConfig) {
   try {

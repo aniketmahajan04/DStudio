@@ -20,10 +20,14 @@ import { Form } from "../ui/form";
 import { Field, FieldLabel, FieldError } from "../ui/field";
 import { Input } from "../ui/input";
 import { useState } from "react";
-import { testConnectionToDatabase } from "@/app/api/actions/database-actions";
+import {
+  saveConnectionAndFetchMetadata,
+  testConnectionToDatabase,
+} from "@/app/api/actions/database-actions";
 import { toastManager } from "../ui/toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { DatabaseType } from "@/lib/database/types";
+import { useConnectionStore } from "@/store/useConnectionStore";
 
 function NewConnection({
   triggerLabel,
@@ -45,22 +49,29 @@ function NewConnection({
   const [databasePassword, setDatabasePassword] = useState("");
   // Connection string
   const [connectionString, setConnectionString] = useState("");
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [ssl, setSSL] = useState(false);
 
+  const { setActiveConnection } = useConnectionStore();
+
+  const getConnectionConfig = () => {
+    return connectionMode === "uri"
+      ? {
+          type: selectedDbType,
+          connectionString,
+        }
+      : {
+          type: selectedDbType,
+          port,
+          host,
+          database: databaseName,
+          username: databaseUsername,
+          password: databasePassword,
+          ssl,
+        };
+  };
   const handleTestConnection = () => {
-    const connectionConfig =
-      connectionMode === "uri"
-        ? {
-            type: selectedDbType,
-            connectionString,
-          }
-        : {
-            type: selectedDbType,
-            port,
-            host,
-            database: databaseName,
-            username: databaseUsername,
-            password: databasePassword,
-          };
+    const connectionConfig = getConnectionConfig();
     toastManager.promise(
       testConnectionToDatabase(connectionConfig).then((result) => {
         console.log("RESULT:", result);
@@ -86,6 +97,64 @@ function NewConnection({
         }),
       },
     );
+  };
+
+  const handleConnect = async () => {
+    if (!connectionName.trim()) {
+      toastManager.add({
+        title: "Validation Error",
+        type: "error",
+        description: "Please enter a connection name",
+      });
+      return;
+    }
+
+    const connectionConfig = getConnectionConfig();
+    setIsConnecting(true);
+
+    try {
+      const result = await saveConnectionAndFetchMetadata(
+        connectionName,
+        connectionConfig,
+      );
+
+      if (!result.success || !result.data) {
+        throw new Error(result.error || "Failed to save connection.");
+      }
+
+      const { connectionId, metadata, tableDetails } = result.data;
+
+      // Update the store with connection data
+      setActiveConnection(connectionId, connectionName, metadata, tableDetails);
+
+      toastManager.add({
+        title: "Connection successfully! 🎉",
+        type: "success",
+        description: `Connected to ${connectionName}`,
+      });
+
+      onOpenChange(false);
+
+      resetForm();
+    } catch (error: any) {
+      toastManager.add({
+        title: "Connection Failed",
+        type: "error",
+        description: error.message || "Something went wrong",
+      });
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const resetForm = () => {
+    setConnectionName("");
+    setHost("");
+    setPort(undefined);
+    setDatabaseName("");
+    setDatabasePassword("");
+    setConnectionString("");
+    setSSL(false);
   };
 
   return (
@@ -117,7 +186,8 @@ function NewConnection({
               </FieldLabel>
               <Input
                 onChange={(e) => setConnectionName(e.target.value)}
-                name="My Production Database"
+                value={connectionName}
+                name="connectionName"
                 type="text"
                 placeholder="Enter connection name"
                 required
@@ -136,6 +206,7 @@ function NewConnection({
                   onClick={() => setSelectedDbType("postgresql")}
                   variant="outline"
                   className="px-4 py-6"
+                  type="button"
                 >
                   <Image
                     src={PostgresLogo}
@@ -151,6 +222,7 @@ function NewConnection({
                   variant="outline"
                   className="px-4 py-6"
                   disabled
+                  type="button"
                 >
                   <Image
                     src={MysqlLogo}
@@ -166,6 +238,7 @@ function NewConnection({
                   variant="outline"
                   className="px-4 py-6"
                   disabled
+                  type="button"
                 >
                   <Image
                     src={SqliteLogo}
@@ -220,6 +293,7 @@ function NewConnection({
                         <Input
                           name="host"
                           type="text"
+                          value={host}
                           placeholder="Host"
                           className="py-2"
                           onChange={(e) => setHost(e.target.value)}
@@ -231,6 +305,7 @@ function NewConnection({
                         <Input
                           name="port"
                           type="number"
+                          value={port || ""}
                           placeholder="Port"
                           className="py-2"
                           onChange={(e) =>
@@ -251,6 +326,7 @@ function NewConnection({
                       <Input
                         name="username"
                         type="text"
+                        value={databaseUsername}
                         placeholder="Username"
                         className="py-2"
                         onChange={(e) => setDatabaseUsername(e.target.value)}
@@ -264,6 +340,7 @@ function NewConnection({
                       <Input
                         name="database name"
                         type="text"
+                        value={databaseName}
                         placeholder="Database name"
                         className="py-2"
                         onChange={(e) => setDatabaseName(e.target.value)}
@@ -277,6 +354,7 @@ function NewConnection({
                       <Input
                         name="Password"
                         type="text"
+                        value={databasePassword}
                         placeholder="Password"
                         className="py-2"
                         onChange={(e) => setDatabasePassword(e.target.value)}
@@ -289,10 +367,23 @@ function NewConnection({
           </Form>
         </div>
         <DialogFooter className="flex">
-          <Button className="py-4" onClick={handleTestConnection}>
+          <Button
+            variant="outline"
+            className="py-4"
+            onClick={handleTestConnection}
+            disabled={isConnecting}
+            type="button"
+          >
             Test Connection
           </Button>
-          <Button className="py-4">Connect</Button>
+          <Button
+            className="py-4"
+            onClick={handleConnect}
+            disabled={isConnecting}
+            type="button"
+          >
+            Connect
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

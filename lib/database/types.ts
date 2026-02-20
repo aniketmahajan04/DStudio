@@ -6,7 +6,7 @@ interface ColumnMetaData {
   nativeType: string; // Database-specific typ
   nullable: boolean;
   defaultValue: string | null;
-  maxLenght?: number; // For string types
+  maxLength?: number; // For string types
   precision?: number; // For numeric type
   scale?: number; // For numeric types
   isPrimaryKey: boolean;
