@@ -8,6 +8,7 @@ import {
   DatabaseMetaData,
   TableMetaData,
 } from "@/lib/database/types";
+import { headers } from "next/headers";
 
 async function testConnectionToDatabase(config: ConnectionConfig) {
   try {
@@ -41,7 +42,9 @@ async function saveConnectionAndFetchMetadata(
   error?: string;
 }> {
   try {
-    const session = await auth();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
     if (!session?.user?.id) {
       return { success: false, error: "Unauthorized" };
