@@ -80,7 +80,7 @@ function NewConnection({
           throw new Error(result.error || "Connection failed.");
         }
 
-        return "Connection successful!";
+        return "Connection testing successful!";
       }),
       {
         loading: {
@@ -359,6 +359,20 @@ function NewConnection({
                         className="py-2"
                         onChange={(e) => setDatabasePassword(e.target.value)}
                       />
+                    </Field>
+                    <Field className="gap-4">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="ssl"
+                          checked={ssl}
+                          onChange={(e) => setSSL(e.target.checked)}
+                          className="rounded"
+                        />
+                        <label htmlFor="ssl" className="text-sm cursor-pointer">
+                          Use SSL/TLS connection
+                        </label>
+                      </div>
                     </Field>
                   </TabsContent>
                 </Tabs>

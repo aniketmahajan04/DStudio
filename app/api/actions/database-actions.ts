@@ -60,7 +60,7 @@ async function saveConnectionAndFetchMetadata(
     }
 
     const testResult = await adapter.testConnection();
-    if (testResult.success) {
+    if (!testResult.success) {
       return { success: false, error: testResult.error };
     }
 

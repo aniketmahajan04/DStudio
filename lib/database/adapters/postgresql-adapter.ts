@@ -33,7 +33,7 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
 
       return { success: true };
     } catch (err: any) {
-      return { success: false, error: err.message };
+      return { success: false, error: err?.message ?? String(err) };
     }
   }
 
@@ -42,9 +42,8 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
   }
 
   async getDatabaseMetadata(): Promise<DatabaseMetaData> {
-    const sql = postgres(this.connectionString, {
-      ssl: this.config.ssl ? "require" : undefined,
-    });
+    const sql = postgres(this.connectionString);
+
     try {
       const versionResult = await sql`SELECT version()`;
       const version = versionResult[0].version;
@@ -62,9 +61,7 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
   }
 
   async getSchema(): Promise<SchemaMetaData[]> {
-    const sql = postgres(this.connectionString, {
-      ssl: this.config.ssl ? "require" : undefined,
-    });
+    const sql = postgres(this.connectionString);
 
     try {
       const schemaRows = await sql`
@@ -113,16 +110,14 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
   }
 
   async getTables(schema: string): Promise<TableMetaData[]> {
-    const sql = postgres(this.connectionString, {
-      ssl: this.config.ssl ? "require" : undefined,
-    });
+    const sql = postgres(this.connectionString);
 
     try {
       const tables = await sql`
         SELECT table_name
         FROM information_schema.tables
         WHERE table_schema = ${schema}
-        AND table_type = 'BASE TYPE'
+        AND table_type = 'BASE TABLE'
         ORDER BY table_name
       `;
 
@@ -143,9 +138,7 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
     schema: string,
     tableName: string,
   ): Promise<TableMetaData> {
-    const sql = postgres(this.connectionString, {
-      ssl: this.config.ssl ? "require" : undefined,
-    });
+    const sql = postgres(this.connectionString);
 
     try {
       const columnsResult = await sql`
@@ -159,7 +152,7 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
           c.numeric_precision,
           c.numeric_scale,
           c.ordinal_position,
-          pdg.description as comment,
+          pgd.description as comment,
           CASE WHEN pk.column_name IS NOT NULL THEN true ELSE false END as is_primary_key,
           CASE WHEN fk.column_name IS NOT NULL THEN true ELSE false END as is_foreign_key,
           CASE WHEN u.column_name IS NOT NULL THEN true ELSE false END as is_unique,
@@ -314,7 +307,7 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
       const indexes: IndexedMetaData[] = indexResult.map((row) => ({
         name: row.index_name,
         columns: row.columns,
-        isUnique: row.isUnique,
+        isUnique: row.is_unique,
         isPrimary: row.is_primary,
         type: row.type,
       }));
@@ -397,9 +390,7 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
     page?: number,
     pageSize?: number,
   ): Promise<{ rows: any[]; totalCount: number; columns: string[] }> {
-    const sql = postgres(this.connectionString, {
-      ssl: this.config.ssl ? "require" : undefined,
-    });
+    const sql = postgres(this.connectionString);
 
     try {
       const currentPage = page ?? 1;
@@ -432,9 +423,7 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
   async executeQuery(
     query: string,
   ): Promise<{ rows: any[]; rowCount: number; fields: string[] }> {
-    const sql = postgres(this.connectionString, {
-      ssl: this.config.ssl ? "require" : undefined,
-    });
+    const sql = postgres(this.connectionString);
 
     try {
       const result = await sql.unsafe(query);
