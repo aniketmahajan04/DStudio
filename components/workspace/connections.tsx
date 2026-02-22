@@ -10,7 +10,7 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { NewConnection } from "../core/new-connection";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useConnectionStore } from "@/store/useConnectionStore";
 import { toastManager } from "../ui/toast";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ function Connections() {
     new Set(),
   );
   const [expandedTables, setExpandedTables] = useState<Set<string>>(new Set());
+  const [isReconnecting, setIsReconnecting] = useState(false);
 
   const {
     dbMetadata,
@@ -29,7 +30,52 @@ function Connections() {
     selectedTable,
     activeConnectionId,
     activeConnectionName,
+    setActiveConnection,
+    setIsConnecting,
   } = useConnectionStore();
+
+  useEffect(() => {
+    const reconnect = async () => {
+      if (activeConnectionId && !dbMetadata) {
+        setIsReconnecting(true);
+        setIsConnecting(true);
+
+        try {
+          const result = await connectToSavedConnection(activeConnectionId);
+
+          if (result.success && result.data) {
+            const { connectionName, metadata, tableDetails } = result.data;
+
+            setActiveConnection(
+              activeConnectionId,
+              connectionName,
+              metadata,
+              tableDetails,
+            );
+          } else {
+            useConnectionStore.getState().clearSession();
+            toastManager.add({
+              title: "Reconnction Failed",
+              type: "error",
+              description: result.error || "Failed to reconnect",
+            });
+          }
+        } catch (error: any) {
+          useConnectionStore.getState().clearSession();
+          toastManager.add({
+            title: "Reconnection Failed",
+            type: "error",
+            description: error.message,
+          });
+        } finally {
+          setIsReconnecting(false);
+          setIsConnecting(false);
+        }
+      }
+    };
+
+    reconnect();
+  }, [activeConnectionId, dbMetadata, setActiveConnection, setIsConnecting]);
 
   const toggleSchema = (schemaName: string) => {
     const newExpanded = new Set(expandedSchemas);
@@ -68,8 +114,18 @@ function Connections() {
 
   return (
     <div className="flex flex-col h-full justify-between">
+      {/* Reconnecting State */}
+      {isReconnecting && (
+        <div className="flex-1 overflow-y-auto px-2 py-4">
+          <div className="text-center py-8 text-muted-foreground text-sm">
+            <RefreshCw className="mx-auto mb-2 h-12 w-12 animate-spin" />
+            <p>Reconnecting...</p>
+            <p className="text-xs mt-1">Restoring your connection</p>
+          </div>
+        </div>
+      )}
       {/* No connection State */}
-      {!activeConnectionId && (
+      {!activeConnectionId && !isReconnecting && (
         <div className="flex-1 overflow-y-auto px-2 py-4">
           <div className="text-center py-8 text-muted-foreground">
             <Database className="mx-auto mb-2 h-12 w-12 opacity-20" />
@@ -80,7 +136,7 @@ function Connections() {
       )}
 
       {/* Active Connection */}
-      {activeConnectionId && (
+      {activeConnectionId && !isReconnecting && dbMetadata && (
         <>
           <div className="px-2 py-4 border-b">
             <Input
@@ -264,7 +320,7 @@ function Connections() {
           isOpen={isNewConnectionOpen}
           onOpenChange={setIsNewConnectionOpen}
         />
-        {activeConnectionId && (
+        {activeConnectionId && !isReconnecting && (
           <Button
             className="py-4"
             variant="outline"
