@@ -5,6 +5,7 @@ import {
   Database,
   Table,
   RefreshCw,
+  Columns,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -20,10 +21,11 @@ function Connections() {
   const [expandedSchemas, setExpandedSchemas] = useState<Set<string>>(
     new Set(),
   );
-  const [isLoadingConnections, setIsLoadingConnections] = useState(true);
+  const [expandedTables, setExpandedTables] = useState<Set<string>>(new Set());
 
   const {
     dbMetadata,
+    tables,
     selectedTable,
     activeConnectionId,
     activeConnectionName,
@@ -38,6 +40,17 @@ function Connections() {
     }
 
     setExpandedSchemas(newExpanded);
+  };
+
+  const toggleTables = (tableName: string) => {
+    const newExpandedTable = new Set(expandedTables);
+    if (newExpandedTable.has(tableName)) {
+      newExpandedTable.delete(tableName);
+    } else {
+      newExpandedTable.add(tableName);
+    }
+
+    setExpandedTables(newExpandedTable);
   };
 
   const handleTableClick = (schema: string, tableName: string) => {
@@ -110,7 +123,7 @@ function Connections() {
 
               {/* Schemas */}
               {filteredSchemas?.map((schema) => (
-                <div key={schema.name} className="ml-1">
+                <div key={schema.name} className="ml-1 pr-2">
                   {/* Schema Header */}
                   <button
                     onClick={() => toggleSchema(schema.name)}
@@ -130,8 +143,8 @@ function Connections() {
 
                   {/* Tables */}
                   {expandedSchemas.has(schema.name) && (
-                    <div className="ml-4 space-y-0.5 mt-1">
-                      {schema.tables.map((table) => (
+                    <div className="ml-4 space-y-0.5 mt-1 pr-2">
+                      {/* {schema.tables.map((table) => (
                         <button
                           key={table.name}
                           onClick={() =>
@@ -151,7 +164,90 @@ function Connections() {
                             </span>
                           )}
                         </button>
-                      ))}
+                      ))} */}
+                      {schema.tables.map((table) => {
+                        const tableKey = `${schema.name}.${table.name}`;
+                        const tableMetadata = tables[tableKey];
+                        const isExpanded = expandedTables.has(tableKey);
+
+                        return (
+                          <div key={table.name}>
+                            {/* Table Row */}
+                            <div className="flex items-center gap-1">
+                              {/* Expand/collapse Icon */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleTables(tableKey);
+                                }}
+                                className="p-0.5 hover:bg-accent rounded"
+                              >
+                                {isExpanded ? (
+                                  <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                                ) : (
+                                  <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                                )}
+                              </button>
+
+                              {/* Table Button */}
+                              <button
+                                onClick={() =>
+                                  handleTableClick(schema.name, table.name)
+                                }
+                                className={cn(
+                                  "flex items-center gap-2 py-1.5 px-2 hover:bg-accent rounded-md flex-1 text-left group transition-colors",
+                                  selectedTable == tableKey && "bg-accent",
+                                )}
+                              >
+                                <Table className="h-3.5 w-3.5 text-muted-foreground" />
+                                <span className="text-sm truncate">
+                                  {table.name}
+                                </span>
+                                {table.rowCount !== undefined && (
+                                  <span className="text-xs text-muted-foreground ml-auto">
+                                    {table.rowCount.toLocaleString()}
+                                  </span>
+                                )}
+                              </button>
+                            </div>
+
+                            {/* Columns (Expanded) */}
+                            {isExpanded && tableMetadata && (
+                              <div className="ml-8 mt-1 space-y-0.5">
+                                {tableMetadata.columns.map((column) => (
+                                  <div
+                                    key={column.name}
+                                    className="flex items-center gap-2 py-1 px-2 hover:bg-accent/50 rounded text-xs"
+                                  >
+                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                      <Columns className="h-3 w-3 text-muted-foreground shrink-0" />
+                                      <span className="text-foreground truncate">
+                                        {column.name}
+                                      </span>
+                                    </div>
+                                    {/* <span className="text-muted-foreground ml-auto">
+                                      {column.type}
+                                    </span> */}
+
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      {column.isPrimaryKey && (
+                                        <span className="text-yellow-500 text-xs">
+                                          PK
+                                        </span>
+                                      )}
+                                      {column.isForeignKey && (
+                                        <span className="text-blue-500 text-xs">
+                                          FK
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
