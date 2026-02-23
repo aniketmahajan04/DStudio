@@ -27,10 +27,10 @@ function mapDbType(
 
 async function testConnectionToDatabase(config: ConnectionConfig) {
   try {
-    // const session = await auth();
-    // if (!session?.user?.id) {
-    //   return { success: false, error: "Unauthorized" };
-    // }
+    const session = await auth.api.getSession();
+    if (!session?.user?.id) {
+      return { success: false, error: "Unauthorized" };
+    }
     const adapter = DatabaseAdapterFactory.createAdapter(config);
     const testResult = await adapter.testConnection();
 
@@ -196,8 +196,72 @@ async function connectToSavedConnection(connectionId: string): Promise<{
     return { success: false, error: error.message };
   }
 }
+
+async function fetchTableData(
+  connectionId: string,
+  schema: string,
+  tableName: string,
+  page: number = 1,
+  pageSize: number = 50,
+): Promise<{
+  success: boolean;
+  data?: {
+    rows: any[];
+    totalCount: number;
+    columns: string[];
+  };
+  error?: string;
+}> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const connection = await prisma.connection.findFirst({
+      where: {
+        id: connectionId,
+        userId: session.user.id,
+      },
+    });
+
+    if (!connection) {
+      return { success: false, error: "Connection not found" };
+    }
+
+    const connectionUrl = decryptConnectionUrl(
+      connection.connectionUrl,
+      connection.iv,
+    );
+
+    const config: ConnectionConfig = {
+      type: mapDbType(connection.type),
+      connectionString: connectionUrl,
+    };
+
+    const adapter = new PostgreSQLAdapter(config);
+    const result = await adapter.getTableData(
+      schema,
+      tableName,
+      page,
+      pageSize,
+    );
+
+    return {
+      success: true,
+      data: result,
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 export {
   testConnectionToDatabase,
   saveConnectionAndFetchMetadata,
   connectToSavedConnection,
+  fetchTableData,
 };
