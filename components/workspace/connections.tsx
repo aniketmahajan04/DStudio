@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { useConnectionStore } from "@/store/useConnectionStore";
 import { toastManager } from "../ui/toast";
 import { cn } from "@/lib/utils";
+import { connectToSavedConnection } from "@/app/api/actions/database-actions";
 
 function Connections() {
   const [isNewConnectionOpen, setIsNewConnectionOpen] = useState(false);

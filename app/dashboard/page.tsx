@@ -3,6 +3,7 @@ import SideBar from "@/components/core/side-bar";
 
 import { StatusLine } from "@/components/core/statusLine";
 import { MainContentBar } from "@/components/maincontent/main-content-bar";
+import { MainContentWrapper } from "@/components/maincontent/main-content-wrapper";
 
 import { WorkspaceBar } from "@/components/workspace/workspace-bar";
 
@@ -45,7 +46,8 @@ export default async function DashboardPage() {
 
           <div className="h-full bg-muted/20 flex flex-col">
             <MainContentBar />
-            <p className="text-muted-foreground">Main Content Area</p>
+            {/* <p className="text-muted-foreground">Main Content Area</p> */}
+            <MainContentWrapper />
           </div>
         </div>
       </div>
