@@ -165,8 +165,8 @@ function DataExplorerTab() {
       </div>
 
       {/*Table*/}
-      <div className="flex-1 overflow-auto">
-        <Table>
+      <div className="flex-1 min-h-0 overflow-auto">
+        <Table className="max-w-full">
           <TableHeader className="sticky top-0 z-10 border-b">
             <TableRow>
               <TableHead className="w-12 text-center font-semibold">
