@@ -6,6 +6,7 @@ import TopBar from "@/components/core/top-bar";
 import { SignIn } from "@/components/auth/sign-in";
 import { AuthSyncProvider } from "@/components/providers/AuthProviders";
 import { ToastProvider } from "@/components/ui/toast";
+import "reactflow/dist/style.css";
 
 const poppins = Poppins({
   subsets: ["latin"],
