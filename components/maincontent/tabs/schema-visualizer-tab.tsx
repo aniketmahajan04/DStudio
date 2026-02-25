@@ -2,7 +2,6 @@
 import { TableMetaData, TablePosition } from "@/lib/database/types";
 import { useConnectionStore } from "@/store/useConnectionStore";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { table } from "node:console";
 import React, { JSX, useEffect, useRef, useState } from "react";
 
 function SchemaVisualizerTab() {
@@ -19,6 +18,8 @@ function SchemaVisualizerTab() {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [draggingTable, setDraggingTable] = useState<string | null>(null);
+  const [tableDragOffset, setTableDragOffset] = useState({ x: 0, y: 0 });
 
   // Initialize with first schema
   useEffect(() => {
@@ -77,11 +78,22 @@ function SchemaVisualizerTab() {
     if (e.button === 0 && e.target === canvasRef.current) {
       // Left click
       setIsDragging(true);
-      setDragStart({ x: e.clientX - offset.x, y: e.clientX - offset.y });
+      setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (draggingTable) {
+      setTablePosition((prev) => ({
+        ...prev,
+        [draggingTable]: {
+          x: e.clientX - tableDragOffset.x,
+          y: e.clientY - tableDragOffset.y,
+        },
+      }));
+      return;
+    }
+
     if (isDragging) {
       setOffset({
         x: e.clientX - dragStart.x,
@@ -92,6 +104,7 @@ function SchemaVisualizerTab() {
 
   const handleMouseUp = () => {
     setIsDragging(false);
+    setDraggingTable(null);
   };
 
   const renderTable = (tableKey: string, table: TableMetaData) => {
@@ -122,12 +135,22 @@ function SchemaVisualizerTab() {
     return (
       <div
         key={tableKey}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          const pos = tablePositions[tableKey];
+
+          setDraggingTable(tableKey);
+          setTableDragOffset({
+            x: e.clientX - pos.x,
+            y: e.clientY - pos.y,
+          });
+        }}
         className="absolute bg-card border backdrop-blur-sm border-border rounded-sm shadow-lg overflow-hidden hover:scale-105"
         style={{
           left: `${position.x}px`,
           top: `${position.y}px`,
           minWidth: "280px",
-          maxWidth: "220px",
+          // maxWidth: "220px",
         }}
       >
         {/* Table Header */}
@@ -419,14 +442,14 @@ function SchemaVisualizerTab() {
           >
             +
           </button>
-          <div className="h-px bg-slate-600/50">
+          <div className="h-px bg-slate-600/50" />
             <button
               onClick={() => setScale((s) => Math.max(0.1, s / 1.2))}
               className="px-3 py-2 text-slate-300 hover:bg-slate-700/50 transition-colors"
             >
               -
             </button>
-            <div className="h-px bg-slate-600/50">
+            <div className="h-px bg-slate-600/50" />
               <button
                 onClick={() => {
                   setScale(1);
@@ -471,7 +494,7 @@ function SchemaVisualizerTab() {
                         className="absolute bg-emerald-500/40 border border-emerald-400/30 rounded"
                         style={{
                           left: `${pos.x}px`,
-                          top: `${pos.y}`,
+                          top: `${pos.y}px`,
                           width: "180px",
                           height: "100px",
                         }}
@@ -483,7 +506,7 @@ function SchemaVisualizerTab() {
             </div>
           </div>
         </div>
-      </div>
+}
 
       {/* Legend */}
       <div className="px-4 py-2 border-t bg-card text-xs text-muted-foreground">
@@ -507,7 +530,6 @@ function SchemaVisualizerTab() {
         </div>
       </div>
     </div>
-  );
 }
 
 export { SchemaVisualizerTab };
