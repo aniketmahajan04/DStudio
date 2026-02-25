@@ -57,9 +57,9 @@ function SchemaVisualizerTab() {
         },
         data: {
           label: (
-            <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 min-w-[180px] max-w-[220px]">
+            <div className="bg-secondary border border-slate-700 rounded-lg p-3 min-w-[180px] max-w-[220px]">
               {/* Table name header */}
-              <div className="text-ema font-medium mb-2 pb-2 border-b border-slate-700 truncate">
+              <div className="text-primary font-medium mb-2 pb-2 border-b border-slate-700 truncate">
                 {table.name}
               </div>
 
@@ -154,15 +154,17 @@ function SchemaVisualizerTab() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-950">
+    <div className="flex flex-col h-full bg-background">
       {/* Schema Selector */}
-      <div className="px-4 py-3 border-b border-slate-800 bg-slate-900/50">
+      <div className="px-4 py-3 border-b bg-background">
         <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-slate-300">Schema:</label>
+          <label className="text-sm font-medium text-muted-foreground">
+            Schema:
+          </label>
           <select
             value={selectedSchema || ""}
             onChange={(e) => setSelectedSchema(e.target.value)}
-            className="bg-slate-800 border border-slate-700 rounded-md px-3 py-1.5 text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="bg-secondary border border-border rounded-md px-3 py-1.5 text-sm text-muted-foreground focus:outline-none focus:ring-2 focus:ring-muted-foreground"
           >
             {dbMetadata.schemas.map((schema) => (
               <option key={schema.name} value={schema.name}>
@@ -181,19 +183,20 @@ function SchemaVisualizerTab() {
           onNodesChange={onNodesChange}
           onEdgesChange={noEdgesChange}
           fitView
-          className="bg-slate-950"
+          className="bg-background"
           minZoom={0.1}
           maxZoom={2}
         >
           <Background color="#334155" gap={16} />
-          <Controls className="bg-slate-800 border-slate-700" />
+          <Controls className="bg-slate-800 rounded border-slate-700" />
           <MiniMap
-            className="bg-slate-900 border-slate-700"
+            className="bg-background border-slate-700"
             nodeColor="1e293b"
             maskColor="rgba(15, 23, 42, 0.8)"
             style={{
               background: "#0f172a",
               border: "1px solid #334155",
+              borderRadius: "4px",
             }}
           />
         </ReactFlow>
