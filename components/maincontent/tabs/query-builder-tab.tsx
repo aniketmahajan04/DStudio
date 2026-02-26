@@ -181,7 +181,39 @@ function QueryBuilderTab() {
                       <Trash className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  <select className="w-full  bg-slate-800 border border-slate-500 rounded px-2 py-1.5 text-xs text-slate-300 mb-2"></select>
+
+                  <select
+                    value={condition.operator}
+                    onChange={(e) =>
+                      updateWhereCondition(
+                        condition.id,
+                        "operator",
+                        e.target.value,
+                      )
+                    }
+                    className="w-full  bg-slate-800 border border-slate-500 rounded px-2 py-1.5 text-xs text-slate-300 mb-2"
+                  >
+                    {operators.map((operator) => (
+                      <option key={operator} value={operator}>
+                        {operator}
+                      </option>
+                    ))}
+                  </select>
+                  {!["IS NULL", "IS NOT NULL"].includes(condition.operator) && (
+                    <input
+                      type="text"
+                      value={condition.value}
+                      onChange={(e) =>
+                        updateWhereCondition(
+                          condition.id,
+                          "value",
+                          e.target.value,
+                        )
+                      }
+                      placeholder="value"
+                      className="w-full bgslate-800 border border-slate-700 rounded px-2 py-1.5 text-xs text-slate-300 mb-2"
+                    />
+                  )}
                 </div>
               ))}
             </div>
