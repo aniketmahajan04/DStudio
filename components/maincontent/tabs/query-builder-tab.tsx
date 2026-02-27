@@ -71,7 +71,7 @@ function QueryBuilderTab() {
     useConnectionStore();
 
   const [selectedTable, setSelectedTable] = useState("");
-  const [columns, setColumns] = useState<Column[]>(mockColumns.users);
+  const [columns, setColumns] = useState<Column[]>([]);
   const [whereConditions, setWhereConditions] = useState<WhereCondition[]>([]);
   const [joinClauses, setJoinClauses] = useState<JoinClause[]>([]);
   const [orderBy, setOrderBy] = useState("");
@@ -153,7 +153,7 @@ function QueryBuilderTab() {
       {
         id: Date.now().toString(),
         type: "INNER JOIN",
-        table: mockTables[1],
+        table: availableTables[1] || availableTables[0],
         leftColumn: columns[0]?.name || "",
         rightColumn: "id",
       },
@@ -329,7 +329,7 @@ function QueryBuilderTab() {
           </div>
 
           {/* Where conditions */}
-          <div className="border-b overflow-y-auto p-4 flex-1">
+          <div className="border-b overflow-auto p-4 flex-1">
             <div className="flex items-center justify-between mb-3">
               <label className="text-xs text-muted-foreground tracking-wider uppercase">
                 Where conditions
@@ -548,7 +548,11 @@ function QueryBuilderTab() {
               <Code className="w-4 h-4" />
               SQL Preview
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors disabled:opacity-50">
+            <button
+              onClick={handleRunQuery}
+              disabled={isExecuting}
+              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors disabled:opacity-50"
+            >
               <Play className="w-4 h-4" />
               {isExecuting ? "Running..." : "Run Query"}
             </button>

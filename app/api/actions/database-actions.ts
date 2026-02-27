@@ -259,9 +259,12 @@ async function fetchTableData(
   }
 }
 
+async function executeQuery(connectionId: string, query: string) {}
+
 export {
   testConnectionToDatabase,
   saveConnectionAndFetchMetadata,
   connectToSavedConnection,
   fetchTableData,
+  executeQuery,
 };
