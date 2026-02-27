@@ -3,7 +3,7 @@ import { ChevronDown, Code, Play, Plus, Trash, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useConnectionStore } from "@/store/useConnectionStore";
 import { toastManager } from "@/components/ui/toast";
-// import { executeQuery } from "@/app/api/actions/database-actions";
+import { executeQuery } from "@/app/api/actions/database-actions";
 
 interface Column {
   name: string;
@@ -41,30 +41,30 @@ const operators = [
 
 const joinTypes = ["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "FULL OUTER JOIN"];
 
-const mockTables = ["users", "orders", "products", "categories", "reviews"];
+// const mockTables = ["users", "orders", "products", "categories", "reviews"];
 
-const mockColumns: { [key: string]: Column[] } = {
-  users: [
-    { name: "id", type: "integer", selected: false },
-    { name: "name", type: "varchar", selected: false },
-    { name: "email", type: "varchar", selected: false },
-    { name: "created_at", type: "timestamp", selected: false },
-    { name: "active", type: "boolean", selected: false },
-  ],
-  orders: [
-    { name: "id", type: "integer", selected: false },
-    { name: "user_id", type: "integer", selected: false },
-    { name: "total", type: "numeric", selected: false },
-    { name: "status", type: "varchar", selected: false },
-    { name: "created_at", type: "timestamp", selected: false },
-  ],
-  products: [
-    { name: "id", type: "integer", selected: false },
-    { name: "name", type: "varchar", selected: false },
-    { name: "price", type: "numeric", selected: false },
-    { name: "category_id", type: "integer", selected: false },
-  ],
-};
+// const mockColumns: { [key: string]: Column[] } = {
+//   users: [
+//     { name: "id", type: "integer", selected: false },
+//     { name: "name", type: "varchar", selected: false },
+//     { name: "email", type: "varchar", selected: false },
+//     { name: "created_at", type: "timestamp", selected: false },
+//     { name: "active", type: "boolean", selected: false },
+//   ],
+//   orders: [
+//     { name: "id", type: "integer", selected: false },
+//     { name: "user_id", type: "integer", selected: false },
+//     { name: "total", type: "numeric", selected: false },
+//     { name: "status", type: "varchar", selected: false },
+//     { name: "created_at", type: "timestamp", selected: false },
+//   ],
+//   products: [
+//     { name: "id", type: "integer", selected: false },
+//     { name: "name", type: "varchar", selected: false },
+//     { name: "price", type: "numeric", selected: false },
+//     { name: "category_id", type: "integer", selected: false },
+//   ],
+// };
 
 function QueryBuilderTab() {
   const { dbMetadata, tables, activeConnectionId, selectedSchema } =
@@ -278,9 +278,9 @@ function QueryBuilderTab() {
 
   return (
     <div className="h-full flex-1 flex flex-col bg-background overflow-hidden">
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Left panel - query configuration*/}
-        <div className="w-96 flex flex-col overflow-hidden border-r">
+        <div className="w-96 flex flex-col overflow-hidden border-r min-h-0">
           {/* Table selection */}
           <div className="border-b px-4 py-2 flex items-center gap-4">
             <label className="text-xs tracking-wider text-muted-foreground uppercase shrink-0">
@@ -329,8 +329,8 @@ function QueryBuilderTab() {
           </div>
 
           {/* Where conditions */}
-          <div className="border-b overflow-auto p-4 flex-1">
-            <div className="flex items-center justify-between mb-3">
+          <div className="border-b p-4 flex flex-col max-h-52">
+            <div className="flex items-center justify-between mb-3 shrink-0">
               <label className="text-xs text-muted-foreground tracking-wider uppercase">
                 Where conditions
               </label>
@@ -342,7 +342,7 @@ function QueryBuilderTab() {
                 Add
               </button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 overflow-y-auto flex-1 h-0 pr-1 custom-scrollbar">
               {whereConditions.map((condition) => (
                 <div
                   key={condition.id}
@@ -417,8 +417,8 @@ function QueryBuilderTab() {
           </div>
 
           {/* JOIN Clouses */}
-          <div className="border-b p-4 overflow-auto">
-            <div className="flex items-center justify-between mb-3">
+          <div className="border-b p-4 flex flex-col max-h-52">
+            <div className="flex items-center justify-between mb-3 shrink-0">
               <label className="text-xs text-muted-foreground uppercase tracking-wider">
                 Joins
               </label>
@@ -430,7 +430,7 @@ function QueryBuilderTab() {
                 Add
               </button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 overflow-y-auto flex-1 h-0  pr-1 custom-scrollbar">
               {joinClauses.map((join) => (
                 <div
                   key={join.id}
@@ -534,7 +534,7 @@ function QueryBuilderTab() {
         </div>
 
         {/* Right Panel */}
-        <div className="flex-1 flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
           {/* Toolbar */}
           <div className="border-b p-4 flex items-center justify-between ">
             <button
