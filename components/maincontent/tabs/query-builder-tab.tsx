@@ -1,6 +1,6 @@
 "use client";
 import { ChevronDown, Code, Play, Plus, Trash, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useConnectionStore } from "@/store/useConnectionStore";
 import { toastManager } from "@/components/ui/toast";
 import { executeQuery } from "@/app/api/actions/database-actions";
@@ -80,10 +80,16 @@ function QueryBuilderTab() {
   const [isExecuting, setIsExecuting] = useState(false);
   const [queryResult, setQueryResult] = useState<any>(null);
 
-  const availableTables =
-    dbMetadata?.schemas
-      .find((s) => s.name === selectedSchema)
-      ?.tables.map((t) => t.name) || [];
+  // const availableTables =
+  //   dbMetadata?.schemas
+  //     .find((s) => s.name === selectedSchema)
+  //     ?.tables.map((t) => t.name) || [];
+
+  const availableTables = useMemo(() => {
+    const schema = dbMetadata?.schemas.find((s) => s.name === selectedSchema);
+
+    return schema?.tables.map((t) => t.name) ?? [];
+  }, [dbMetadata, selectedSchema]);
 
   useEffect(() => {
     if (availableTables.length > 0 && !selectedTable) {
@@ -329,7 +335,7 @@ function QueryBuilderTab() {
           </div>
 
           {/* Where conditions */}
-          <div className="border-b p-4 flex flex-col max-h-52">
+          <div className="border-b p-4 flex flex-col max-h-52 flex-1">
             <div className="flex items-center justify-between mb-3 shrink-0">
               <label className="text-xs text-muted-foreground tracking-wider uppercase">
                 Where conditions
@@ -417,7 +423,7 @@ function QueryBuilderTab() {
           </div>
 
           {/* JOIN Clouses */}
-          <div className="border-b p-4 flex flex-col max-h-52">
+          <div className="border-b p-4 flex flex-col max-h-52 flex-1">
             <div className="flex items-center justify-between mb-3 shrink-0">
               <label className="text-xs text-muted-foreground uppercase tracking-wider">
                 Joins
@@ -478,7 +484,7 @@ function QueryBuilderTab() {
                         updateJoinClause(join.id, "leftColumn", e.target.value)
                       }
                       placeholder="Left column"
-                      className="flex-1 bg-background border rounded px-2 py-1.5 "
+                      className="flex-1 bg-background border rounded px-2 py-1.5 min-w-0"
                     />
                     <span className="self-center text-muted-foreground">=</span>
                     <input
@@ -488,7 +494,7 @@ function QueryBuilderTab() {
                         updateJoinClause(join.id, "rightColumn", e.target.value)
                       }
                       placeholder="Right column"
-                      className="flex-1 bg-background border rounded px-2 py-1.5"
+                      className="flex-1 bg-background border rounded px-2 py-1.5 min-w-0"
                     />
                   </div>
                 </div>
@@ -560,7 +566,7 @@ function QueryBuilderTab() {
 
           {/* SQL Preview */}
           {showSqlPreview && (
-            <div className="border-b bg-accent/20">
+            <div className="border-b bg-accent/20 max-h-60 overflow-auto">
               <div className="p-4">
                 <pre className="font-mono text-sm text-primary whitespace-pre-wrap">
                   {generateSQL()}
@@ -606,14 +612,20 @@ function QueryBuilderTab() {
                 </div>
               </div>
             ) : (
-              <div>
-                <div>
-                  <Code className="w-16 h-16 mx-auto mb-4" />
-                  <p className="text-lg mb-2">Build and Execute Query</p>
+              <div className="flex items-center justify-center h-full">
+                <div className="flex flex-col text-center">
+                  <Code className="w-14 h-14 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-lg mb-2 text-muted-foreground">
+                    Build and Execute Query
+                  </p>
 
-                  <p className="text-s">
+                  <p className="text-s text-muted-foreground/70 mb-2">
                     Configure your query using the options on the left, then
                     click Run Query
+                  </p>
+                  <p className="text-md text-primary">
+                    NOTE :- Please avoid using for using this tab for 'SELECT *
+                    QUERY'
                   </p>
                 </div>
               </div>
