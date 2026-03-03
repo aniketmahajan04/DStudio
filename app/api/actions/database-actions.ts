@@ -317,7 +317,7 @@ async function executeQuery(
       data: {
         sqlQuery: query,
         status: "SUCCESS",
-        executiedTime: executionTime,
+        executedTime: executionTime,
         connectionId: connection.id,
       },
     });
