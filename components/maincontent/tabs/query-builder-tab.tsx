@@ -1,5 +1,13 @@
 "use client";
-import { ChevronDown, Code, Play, Plus, Trash, Trash2 } from "lucide-react";
+import {
+  ChevronDown,
+  Code,
+  Play,
+  Plus,
+  Trash,
+  Trash2,
+  RefreshCw,
+} from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { useConnectionStore } from "@/store/useConnectionStore";
 import { toastManager } from "@/components/ui/toast";
@@ -584,16 +592,21 @@ function QueryBuilderTab() {
                 </div>
                 <div className="border rounded-lg overflow-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-accent">
+                    <thead className="bg-accent text-center">
                       <tr>
                         {queryResult.fields.map((field: string) => (
-                          <th key={field}>{field}</th>
+                          <th key={field} className="py-2">
+                            {field}
+                          </th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {queryResult.rows.map((row: any, i: number) => (
-                        <tr key={i} className="border-t hover:bg-accent/50">
+                        <tr
+                          key={i}
+                          className="border-t hover:bg-accent/50 text-center"
+                        >
                           {queryResult.fields.map((field: string) => (
                             <td key={field} className="px-4 py-2">
                               {row[field] === null ? (
@@ -613,21 +626,32 @@ function QueryBuilderTab() {
               </div>
             ) : (
               <div className="flex items-center justify-center h-full">
-                <div className="flex flex-col text-center">
-                  <Code className="w-14 h-14 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-lg mb-2 text-muted-foreground">
-                    Build and Execute Query
-                  </p>
+                {isExecuting ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                      <p className="text-muted-foreground">
+                        Executing operation
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col text-center">
+                    <Code className="w-14 h-14 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-lg mb-2 text-muted-foreground">
+                      Build and Execute Query
+                    </p>
 
-                  <p className="text-s text-muted-foreground/70 mb-2">
-                    Configure your query using the options on the left, then
-                    click Run Query
-                  </p>
-                  <p className="text-md text-primary">
-                    NOTE :- Please avoid using for using this tab for 'SELECT *
-                    QUERY'
-                  </p>
-                </div>
+                    <p className="text-s text-muted-foreground/70 mb-2">
+                      Configure your query using the options on the left, then
+                      click Run Query
+                    </p>
+                    <p className="text-md text-primary">
+                      NOTE :- Please avoid using for using this tab for 'SELECT
+                      * QUERY'
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
