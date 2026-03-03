@@ -57,9 +57,9 @@ function SchemaVisualizerTab() {
         },
         data: {
           label: (
-            <div className="bg-secondary border border-slate-700 rounded-lg p-3 min-w-[180px] max-w-[220px]">
+            <div className="bg-background/80 border border-slate-700 rounded-lg p-3 min-w-[180px] max-w-[220px]">
               {/* Table name header */}
-              <div className="text-primary font-medium mb-2 pb-2 border-b border-slate-700 truncate">
+              <div className="text-muted-foreground font-medium mb-2 pb-2 border-b border-slate-700 truncate">
                 {table.name}
               </div>
 
@@ -68,7 +68,7 @@ function SchemaVisualizerTab() {
                 {table.columns.slice(0, 8).map((column) => (
                   <div
                     key={column.name}
-                    className="flex items-center gap-2 text-slate-300"
+                    className="flex items-center gap-2 text-accent-foreground"
                   >
                     {/* Icon */}
                     {column.isPrimaryKey ? (
@@ -98,7 +98,7 @@ function SchemaVisualizerTab() {
                 ))}
 
                 {/* Show more indicator */}
-                {table.columns.length > 0 && (
+                {table.columns.length > 8 && (
                   <div className="text-slate-500 text-[10px] pt-1">
                     +{table.columns.length - 0} more
                   </div>

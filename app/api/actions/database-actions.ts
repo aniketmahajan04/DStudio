@@ -259,7 +259,111 @@ async function fetchTableData(
   }
 }
 
-async function executeQuery(connectionId: string, query: string) {}
+/**
+ * Execute raw postgresql query and save to history
+ */
+
+async function executeQuery(
+  connectionId: string,
+  query: string,
+): Promise<{
+  success: boolean;
+  data?: {
+    rows: any[];
+    rowCount: number;
+    fields: string[];
+    executionTime: number;
+  };
+  error?: string;
+}> {
+  const startTime = Date.now();
+
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const connection = await prisma.connection.findFirst({
+      where: {
+        id: connectionId,
+        userId: session.user.id,
+      },
+    });
+
+    if (!connection) {
+      return { success: false, error: "Connection not found" };
+    }
+
+    const connectionUrl = decryptConnectionUrl(
+      connection.connectionUrl,
+      connection.iv,
+    );
+
+    const config: ConnectionConfig = {
+      type: mapDbType(connection.type),
+      connectionString: connectionUrl,
+    };
+
+    const adapter = new PostgreSQLAdapter(config);
+    const result = await adapter.executeQuery(query);
+
+    const executionTime = Date.now() - startTime;
+
+    await prisma.history.create({
+      data: {
+        sqlQuery: query,
+        status: "SUCCESS",
+        executiedTime: executionTime,
+        connectionId: connection.id,
+      },
+    });
+
+    return {
+      success: true,
+      data: {
+        ...result,
+        executionTime,
+      },
+    };
+  } catch (error: any) {
+    const executionTime = Date.now() - startTime;
+
+    try {
+      const session = await auth.api.getSession({
+        headers: await headers(),
+      });
+
+      if (session?.user.id) {
+        const connection = await prisma.connection.findFirst({
+          where: {
+            id: connectionId,
+            userId: session.user.id,
+          },
+        });
+
+        if (connection) {
+          await prisma.history.create({
+            data: {
+              sqlQuery: query,
+              status: "FAILED",
+              executedTime: executionTime,
+              errorMessage: error.message,
+              connectionId: connection.id,
+            },
+          });
+        }
+      }
+    } catch (historyError) {
+      console.error("Failed to save history", historyError);
+    }
+
+    return { success: false, error: error.message };
+  }
+}
 
 export {
   testConnectionToDatabase,

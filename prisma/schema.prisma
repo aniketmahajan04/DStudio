@@ -81,7 +81,23 @@ model Connection {
   userId            String
   user              User            @relation(fields: [userId], references: [id], onDelete: Cascade) 
 
+  history           History[]
+
   @@map("connections")
+}
+
+model History {
+  id                String         @id @default(cuid())
+  sqlQuery          String         @map("sql_query")
+  status            Status 
+  executedTime      Int            @map("executedTime")
+  errorMessage      String?        @map("error_message")
+  createdAt         DateTime       @default(now())
+
+  connectionId      String         @map("connection_id")
+  connection        Connection     @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@map("history")
 }
 
 enum Role {
