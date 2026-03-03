@@ -1,9 +1,17 @@
 "use client";
 import { ActivityIcon, Clock, Database, Server, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useConnectionStore } from "@/store/useConnectionStore";
 
 function StatusLine() {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const {
+    dbMetadata,
+    lastQueryTime,
+    activeConnectionName,
+    activeConnectionId,
+    savedConnection,
+  } = useConnectionStore();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -20,6 +28,50 @@ function StatusLine() {
       hour12: false,
     });
   };
+
+  const activeConnection = savedConnection.find(
+    (conn) => conn.id === activeConnectionId,
+  );
+
+  // Exact database type and version
+  const dbType = dbMetadata?.type || "N/A";
+  const dbVersion = dbMetadata?.version || "N/A";
+
+  const getDbDisplayName = () => {
+    if (!dbType || dbType === "N/A") return "Not Connected";
+
+    const typeMap = {
+      postgresql: "PostgreSQL",
+      mysql: "MySQL",
+      sqlite: "SQLite",
+    };
+
+    const displayType = typeMap[dbType as keyof typeof typeMap] || dbType;
+
+    if (dbVersion && dbVersion !== "N/A") {
+      const versionMatch = dbVersion.match(/(\d+\.\d+)/);
+      if (versionMatch) {
+        return `${displayType} ${versionMatch[1]}`;
+      }
+    }
+
+    return displayType;
+  };
+
+  // Format last query time
+  const formatQueryTime = () => {
+    if (!lastQueryTime) {
+      return activeConnectionId ? "Ready" : "Not Connected";
+    }
+
+    return `${lastQueryTime}ms`;
+  };
+
+  // Get table Count
+  const tableCount = dbMetadata?.schemas.reduce(
+    (sum, schema) => sum + schema.tables.length,
+  );
+
   return (
     <div
       className="
@@ -38,16 +90,23 @@ function StatusLine() {
       <div className="flex items-center gap-2">
         <ActivityIcon className="w-3.5 h-3.5 text-emerald-500" />
         <span>
-          Last query: <span className="text-emerald-500">125ms</span>
+          Last query:{" "}
+          <span className="text-emerald-500">{formatQueryTime()}</span>
         </span>
       </div>
 
-      {/* Connection Name */}
+      {/* Database type & version */}
       <div className="flex items-center gap-2 text-muted-foreground">
         <Database className="w-3.5 h-3.5" />
-        <span>PostgreSQL 15.3</span>
+        <span>{getDbDisplayName()}</span>
       </div>
 
+      {/* Table count */}
+      {tableCount !== undefined && tableCount > 0 && (
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Server className="w-3.5 h-3.5" />
+        </div>
+      )}
       {/* HostName  */}
       <div className="flex items-center gap-2 text-muted-foreground">
         <Server className="w-3.5 h-3.5" />

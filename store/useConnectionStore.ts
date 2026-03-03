@@ -38,6 +38,7 @@ interface ConnectionState {
   isConnecting: boolean;
   isFetchingData: boolean;
   error: string | null;
+  lastQueryTime: number | null;
 
   // ACTIONS
   setSavedConnections: (connections: SavedConnection[]) => void;
@@ -93,6 +94,8 @@ interface ConnectionState {
     currentPage: number;
     pageSize: number;
   } | null;
+
+  setLastQueryTime: (time: number) => void;
 }
 
 const DEFAULT_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 Minutes
@@ -111,6 +114,7 @@ const useConnectionStore = create<ConnectionState>()(
       isConnecting: false,
       isFetchingData: false,
       error: null,
+      lastQueryTime: null,
 
       setSavedConnections: (connections) =>
         set({ savedConnections: connections }),
@@ -211,12 +215,15 @@ const useConnectionStore = create<ConnectionState>()(
         }
         return cached;
       },
+
+      setLastQueryTime: (time) => set({ lastQueryTime: time }),
     }),
     {
       name: "dstudio-session-storage", // Persists to localstorage
       partialize: (state) => ({
         activeConnectionId: state.activeConnectionId,
         activeConnectionName: state.activeConnectionName,
+        selectedSchema: state.selectedSchema,
       }),
     },
   ),

@@ -6,10 +6,9 @@ import { Play, Trash2 } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { toastManager } from "@/components/ui/toast";
 import { executeQuery } from "@/app/api/actions/database-actions";
-import { error } from "better-auth/api";
 
 function DdlTab() {
-  const { activeConnectionId } = useConnectionStore();
+  const { activeConnectionId, setLastQueryTime } = useConnectionStore();
   const [sqlQuery, setSqlQuery] = useState("");
   const [isExecuting, setIsExecuting] = useState(false);
   const [queryResult, setQueryResult] = useState<any>(null);
@@ -40,6 +39,7 @@ function DdlTab() {
 
       if (result.success && result.data) {
         setQueryResult(result.data);
+        setLastQueryTime(result.data.executionTime);
         toastManager.add({
           title: "Query Executed",
           type: "success",
@@ -101,7 +101,7 @@ function DdlTab() {
     );
   }
   return (
-    <div className="flex-1 flex flex-col bg-background overflow-hidden">
+    <div className="flex-1 h-full flex flex-col bg-background overflow-hidden">
       <div className="flex-1 flex overflow-hidden">
         {/* Left panel - Results */}
         <div className="flex-1 flex flex-col border-r overflow-hidden">

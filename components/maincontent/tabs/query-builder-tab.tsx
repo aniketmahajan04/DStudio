@@ -75,8 +75,13 @@ const joinTypes = ["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "FULL OUTER JOIN"];
 // };
 
 function QueryBuilderTab() {
-  const { dbMetadata, tables, activeConnectionId, selectedSchema } =
-    useConnectionStore();
+  const {
+    dbMetadata,
+    tables,
+    activeConnectionId,
+    selectedSchema,
+    setLastQueryTime,
+  } = useConnectionStore();
 
   const [selectedTable, setSelectedTable] = useState("");
   const [columns, setColumns] = useState<Column[]>([]);
@@ -243,6 +248,7 @@ function QueryBuilderTab() {
 
       if (result.success && result.data) {
         setQueryResult(result.data);
+        setLastQueryTime(result.data.executionTime);
         toastManager.add({
           title: "Query Executed",
           type: "success",
