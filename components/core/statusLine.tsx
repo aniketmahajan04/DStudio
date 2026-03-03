@@ -10,7 +10,6 @@ function StatusLine() {
     lastQueryTime,
     activeConnectionName,
     activeConnectionId,
-    savedConnection,
   } = useConnectionStore();
 
   useEffect(() => {
@@ -28,10 +27,6 @@ function StatusLine() {
       hour12: false,
     });
   };
-
-  const activeConnection = savedConnection.find(
-    (conn) => conn.id === activeConnectionId,
-  );
 
   // Exact database type and version
   const dbType = dbMetadata?.type || "N/A";
@@ -68,9 +63,11 @@ function StatusLine() {
   };
 
   // Get table Count
-  const tableCount = dbMetadata?.schemas.reduce(
-    (sum, schema) => sum + schema.tables.length,
-  );
+  const tableCount =
+    dbMetadata?.schemas?.reduce(
+      (sum, schema) => sum + schema.tables.length,
+      0,
+    ) ?? undefined;
 
   return (
     <div
@@ -105,19 +102,24 @@ function StatusLine() {
       {tableCount !== undefined && tableCount > 0 && (
         <div className="flex items-center gap-2 text-muted-foreground">
           <Server className="w-3.5 h-3.5" />
+          <span>
+            {tableCount} {tableCount === 1 ? "table" : "tables"}
+          </span>
         </div>
       )}
-      {/* HostName  */}
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <Server className="w-3.5 h-3.5" />
-        <span>Localhost:5432</span>
-      </div>
 
       {/* Connection Name */}
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <Users className="w-3.5 h-3.5" />
-        <span>productionDB</span>
-      </div>
+      {activeConnectionName && (
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Users className="w-3.5 h-3.5" />
+          <span
+            className="truncate max-w-50"
+            title={activeConnectionName}
+          >
+            {activeConnectionName}
+          </span>
+        </div>
+      )}
 
       <div className="flex-1" />
 

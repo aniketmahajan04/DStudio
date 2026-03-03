@@ -201,27 +201,6 @@ function Connections() {
                   {/* Tables */}
                   {expandedSchemas.has(schema.name) && (
                     <div className="ml-4 space-y-0.5 mt-1 pr-2">
-                      {/* {schema.tables.map((table) => (
-                        <button
-                          key={table.name}
-                          onClick={() =>
-                            handleTableClick(schema.name, table.name)
-                          }
-                          className={cn(
-                            "flex items-center gap-2 py-1.5 px-2 hover:bg-accent rounded-md w-full text-left group transition-colors",
-                            selectedTable === `${schema.name}.${table.name}` &&
-                              "bg-accent",
-                          )}
-                        >
-                          <Table className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                          <span className="text-sm truncate">{table.name}</span>
-                          {table.rowCount !== undefined && (
-                            <span className="text-xs text-muted-foreground ml-auto">
-                              {table.rowCount.toLocaleString()}
-                            </span>
-                          )}
-                        </button>
-                      ))} */}
                       {schema.tables.map((table) => {
                         const tableKey = `${schema.name}.${table.name}`;
                         const tableMetadata = tables[tableKey];
@@ -282,9 +261,6 @@ function Connections() {
                                         {column.name}
                                       </span>
                                     </div>
-                                    {/* <span className="text-muted-foreground ml-auto">
-                                      {column.type}
-                                    </span> */}
 
                                     <div className="flex items-center gap-2 shrink-0">
                                       {column.isPrimaryKey && (
