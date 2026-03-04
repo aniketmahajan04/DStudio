@@ -136,11 +136,12 @@ function NewConnection({
       onOpenChange(false);
 
       resetForm();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastManager.add({
         title: "Connection Failed",
         type: "error",
-        description: error.message || "Something went wrong",
+        description:
+          error instanceof Error ? error.message : "Something went wrong",
       });
     } finally {
       setIsConnecting(false);
