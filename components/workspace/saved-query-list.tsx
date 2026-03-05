@@ -1,17 +1,26 @@
+"use client";
 import { SavedQuery } from "@/app/mock-data/mock-save-query";
 import { SavedQueryCard } from "../core/saved-query-card";
 import { ScrollArea } from "../ui/scroll-area";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NewQueryForm } from "./new-query-form";
+import { useState } from "react";
 
 function SavedQueryList({ queries, selectedId, onSelect, onRun }) {
+  const [isNewQueryFormOpen, setIsNewQueryFormOpen] = useState(false);
   return (
     <ScrollArea>
       <div className="gap-2 px-2 py-4 border-b mb-4">
-        <Button className={cn("w-full rounded-md")}>
-          <Plus /> New Query
-        </Button>
+        {/* <Button className={cn("w-full rounded-md")}> */}
+        {/* <Plus /> New Query */}
+        {/* </Button> */}
+        <NewQueryForm
+          triggerLabel="New Query"
+          isOpen={isNewQueryFormOpen}
+          openChange={setIsNewQueryFormOpen}
+        />
       </div>
       <div className="w-72 flex flex-col">
         {queries.map((query: SavedQuery) => (

@@ -26,6 +26,11 @@ function NewQueryForm({
   openChange: (open: boolean) => void;
 }) {
   const [queryName, setQueryName] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSaveQuery = () => {
+    alert("saved");
+  };
   return (
     <Dialog open={isOpen} onOpenChange={openChange}>
       <DialogTrigger className={cn(buttonVariants({ variant: "default" }))}>
