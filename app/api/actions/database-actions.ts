@@ -10,6 +10,7 @@ import { PostgreSQLAdapter } from "@/lib/database/adapters/postgresql-adapter";
 import {
   ConnectionConfig,
   DatabaseMetaData,
+  DatabaseType,
   TableMetaData,
 } from "@/lib/database/types";
 import { headers } from "next/headers";
@@ -367,10 +368,99 @@ async function executeQuery(
   }
 }
 
+/*
+ * Save Frequent queries to db
+ */
+
+async function saveQuery(
+  name: string,
+  sqlQuery: string,
+  dbType: DatabaseType,
+): Promise<{ success: boolean; data?: { id: string }; error?: string }> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const prismaDbType =
+      dbType === "postgresql"
+        ? "POSTGRES"
+        : dbType === "mysql"
+          ? "MYSQL"
+          : "SQLITE";
+
+    const savedQuery = await prisma.savedQuery.create({
+      data: {
+        name,
+        sqlQuery,
+        dbType: prismaDbType,
+        userId: session.user.id,
+      },
+    });
+
+    return {
+      success: true,
+      data: { id: savedQuery.id },
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/*
+ * Get all saved queries
+ */
+
+async function getSavedQueries(): Promise<{
+  success: boolean;
+  data?: Array<{
+    id: string;
+    name: string;
+    sqlQuery: string;
+    dbType: "postgresql" | "mysql" | "sqlite";
+    createdAt: Date;
+    updatedAt: Date;
+  }>;
+  error?: string;
+}> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const queries = await prisma.savedQuery.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    return {
+      success: true,
+      data: queries.map((q) => ({
+        ...q,
+        dbType: mapDbType(q.dbType),
+      })),
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 export {
   testConnectionToDatabase,
   saveConnectionAndFetchMetadata,
   connectToSavedConnection,
   fetchTableData,
   executeQuery,
+  saveQuery,
+  getSavedQueries,
 };
