@@ -7,6 +7,7 @@ import { DatabaseType } from "@/lib/database/types";
 import { getSavedQueries } from "@/app/api/actions/database-actions";
 import { RefreshCw } from "lucide-react";
 import { Button } from "../ui/button";
+import type { SavedQuery as CardSavedQuery } from "@/app/mock-data/mock-save-query";
 
 interface SavedQuery {
   id: string;
@@ -15,6 +16,15 @@ interface SavedQuery {
   dbType: DatabaseType;
   createdAt: Date;
   updatedAt: Date;
+}
+
+function mapToCardSavedQuery(query: SavedQuery): CardSavedQuery {
+  return {
+    id: query.id,
+    name: query.name,
+    query: query.sqlQuery,
+    createdAt: query.createdAt.toISOString(),
+  };
 }
 
 function SavedQueryList({
@@ -38,7 +48,7 @@ function SavedQueryList({
       if (result.success && result.data) {
         setQueries(result.data);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to load queries:", error);
     } finally {
       setIsLoading(false);
@@ -75,18 +85,20 @@ function SavedQueryList({
           ) : queries.length === 0 ? (
             <div className="text-center py-8 px-4 text-muted-foreground">
               <p className="text-sm mb-2">No saved queries yet</p>
-              <p className="text-xs">Click "New Query" to save one</p>
+              <p className="text-xs">
+                Click &quot;New Query&quot; to save one
+              </p>
             </div>
           ) : (
-            queries.map((query) => {
+            queries.map((query) => (
               <SavedQueryCard
                 key={query.id}
-                query={query}
+                query={mapToCardSavedQuery(query)}
                 selected={selectedId === query.id}
                 onSelect={() => handleSelect(query.id)}
-                onRefresh={loadQueries}
-              />;
-            })
+                onRun={() => handleSelect(query.id)}
+              />
+            ))
           )}
         </div>
       </ScrollArea>
