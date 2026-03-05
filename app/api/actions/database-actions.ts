@@ -455,6 +455,31 @@ async function getSavedQueries(): Promise<{
   }
 }
 
+async function deleteSavedQuery(
+  queryId: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    await prisma.savedQuery.delete({
+      where: {
+        id: queryId,
+        userId: session.user.id,
+      },
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 export {
   testConnectionToDatabase,
   saveConnectionAndFetchMetadata,
@@ -463,4 +488,5 @@ export {
   executeQuery,
   saveQuery,
   getSavedQueries,
+  deleteSavedQuery,
 };
