@@ -1,5 +1,4 @@
 "use client";
-import { mockSavedQueries } from "@/app/mock-data/mock-save-query";
 import { SavedQueryList } from "./saved-query-list";
 import { QueryHistoryList } from "./query-history-list";
 import { mockHistory } from "@/app/mock-data/mock-history-data";
@@ -14,10 +13,9 @@ function WorkspaceBar() {
 
       {activeWorkspace === "saved" && (
         <SavedQueryList
-          queries={mockSavedQueries}
-          selectedId={undefined}
-          onSelect={undefined}
-          onRun={undefined}
+          onQuerySelect={(query) => {
+            console.log("selected:", query.sqlQuery);
+          }}
         />
       )}
 

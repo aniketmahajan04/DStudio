@@ -85,11 +85,13 @@ function NewQueryForm({
           description: result.error || "Failed to save query",
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "An unexpected error occurred";
       toastManager.add({
         title: "Error",
         type: "error",
-        description: error.message,
+        description: message,
       });
     } finally {
       setIsSaving(false);
@@ -134,6 +136,8 @@ function NewQueryForm({
                 name="sqlQuery"
                 placeholder="SELECT * FROM users WHERE active = true"
                 className="min-h-[200ox] font-mono text-sm"
+                value={sqlQuery}
+                onChange={(e) => setSqlQuery(e.target.value)}
               />
               <FieldError>Please enter your SQL query.</FieldError>
             </Field>

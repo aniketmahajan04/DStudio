@@ -19,7 +19,10 @@ import {
   DropdownMenuTrigger,
 } from "../ui/menu";
 import { toastManager } from "../ui/toast";
-import { executeQuery } from "@/app/api/actions/database-actions";
+import {
+  deleteSavedQuery,
+  executeQuery,
+} from "@/app/api/actions/database-actions";
 
 function SavedQueryCard({
   query,
@@ -56,6 +59,8 @@ function SavedQueryCard({
       return;
     }
 
+    setIsRunning(true);
+
     try {
       const result = await executeQuery(activeConnectionId, query.sqlQuery);
 
@@ -76,11 +81,13 @@ function SavedQueryCard({
           description: result.error || "Failed to execute query",
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "An unexpected error occurred";
       toastManager.add({
         title: "Error",
         type: "error",
-        description: error.message,
+        description: message,
       });
     } finally {
       setIsRunning(false);
@@ -106,18 +113,20 @@ function SavedQueryCard({
       } else {
         throw new Error(result.error || "Failed to delete query");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "An unexpected error occurred";
       toastManager.add({
         title: "Delete Failed",
         type: "error",
-        description: error.message,
+        description: message,
       });
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const handleCopuQuery = () => {
+  const handleCopyQuery = () => {
     navigator.clipboard.writeText(query.sqlQuery);
     toastManager.add({
       title: "Copied",
@@ -133,6 +142,7 @@ function SavedQueryCard({
         "font-poppins ml-4 mb-4 cursor-pointer transition-colors hover:bg-accent/50",
         selected && "bg-accent border-primary",
       )}
+      onClick={onSelect}
     >
       <CardHeader className="flex justify-between items-center pt-3 pb-2 px-4">
         <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -154,7 +164,7 @@ function SavedQueryCard({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem className={handleCopyQuery}>
+            <DropdownMenuItem onClick={handleCopyQuery}>
               <Copy className="w-4 h-4 mr-2" />
               Copy Query
             </DropdownMenuItem>

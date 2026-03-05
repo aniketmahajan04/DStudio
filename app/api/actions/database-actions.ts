@@ -480,6 +480,37 @@ async function deleteSavedQuery(
   }
 }
 
+async function updateSavedQuery(
+  queryId: string,
+  name: string,
+  sqlQuery: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    await prisma.savedQuery.update({
+      where: {
+        id: queryId,
+        userId: session.user.id,
+      },
+      data: {
+        name,
+        sqlQuery,
+      },
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 export {
   testConnectionToDatabase,
   saveConnectionAndFetchMetadata,
@@ -489,4 +520,5 @@ export {
   saveQuery,
   getSavedQueries,
   deleteSavedQuery,
+  updateSavedQuery,
 };

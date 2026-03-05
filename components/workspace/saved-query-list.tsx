@@ -7,7 +7,6 @@ import { DatabaseType } from "@/lib/database/types";
 import { getSavedQueries } from "@/app/api/actions/database-actions";
 import { RefreshCw } from "lucide-react";
 import { Button } from "../ui/button";
-import type { SavedQuery as CardSavedQuery } from "@/app/mock-data/mock-save-query";
 
 interface SavedQuery {
   id: string;
@@ -16,15 +15,6 @@ interface SavedQuery {
   dbType: DatabaseType;
   createdAt: Date;
   updatedAt: Date;
-}
-
-function mapToCardSavedQuery(query: SavedQuery): CardSavedQuery {
-  return {
-    id: query.id,
-    name: query.name,
-    query: query.sqlQuery,
-    createdAt: query.createdAt.toISOString(),
-  };
 }
 
 function SavedQueryList({
@@ -93,10 +83,10 @@ function SavedQueryList({
             queries.map((query) => (
               <SavedQueryCard
                 key={query.id}
-                query={mapToCardSavedQuery(query)}
+                query={query}
                 selected={selectedId === query.id}
                 onSelect={() => handleSelect(query.id)}
-                onRun={() => handleSelect(query.id)}
+                onRefresh={loadQueries}
               />
             ))
           )}
