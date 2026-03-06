@@ -19,10 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/menu";
 import { toastManager } from "../ui/toast";
-import {
-  deleteSavedQuery,
-  executeQuery,
-} from "@/app/api/actions/database-actions";
+import { deleteSavedQuery } from "@/app/api/actions/database-actions";
 
 function SavedQueryCard({
   query,
@@ -35,8 +32,6 @@ function SavedQueryCard({
   onSelect: () => void;
   onRefresh: () => void;
 }) {
-  const { activeConnectionId, setLastQueryTime } = useConnectionStore();
-  const [isRunning, setIsRunning] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const formatDate = (date: Date) => {
@@ -45,53 +40,6 @@ function SavedQueryCard({
       day: "numeric",
       year: "numeric",
     });
-  };
-
-  const handleRun = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    if (!activeConnectionId) {
-      toastManager.add({
-        title: "No Connection",
-        type: "error",
-        description: "Please connect to a database first",
-      });
-      return;
-    }
-
-    setIsRunning(true);
-
-    try {
-      const result = await executeQuery(activeConnectionId, query.sqlQuery);
-
-      if (result.success && result.data) {
-        if (setLastQueryTime) {
-          setLastQueryTime(result.data.executionTime);
-        }
-
-        toastManager.add({
-          title: "Query Executed",
-          type: "success",
-          description: `${result.data.rowCount} rows in ${result.data.executionTime}ms`,
-        });
-      } else {
-        toastManager.add({
-          title: "Query Failed",
-          type: "error",
-          description: result.error || "Failed to execute query",
-        });
-      }
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "An unexpected error occurred";
-      toastManager.add({
-        title: "Error",
-        type: "error",
-        description: message,
-      });
-    } finally {
-      setIsRunning(false);
-    }
   };
 
   const handleDelete = async () => {
@@ -190,14 +138,6 @@ function SavedQueryCard({
         <span className="text-muted-foreground/50 text-sm ">
           {formatDate(query.createdAt)}
         </span>
-        <Button
-          size="sm"
-          className="rounded-sm h-7 text-xs px-3"
-          onClick={handleRun}
-          disabled={isRunning}
-        >
-          {isRunning ? "Running..." : "Run"}
-        </Button>
       </CardFooter>
     </Card>
   );
