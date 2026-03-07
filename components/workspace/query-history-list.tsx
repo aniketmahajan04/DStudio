@@ -4,7 +4,7 @@ import { QueryHistoryCard } from "./query-history-card";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 
-function QueryHistoryList({ histories, onRun }) {
+function QueryHistoryList() {
   return (
     <ScrollArea>
       <div className="flex justify-between items-center px-2 py-4 mb-4">

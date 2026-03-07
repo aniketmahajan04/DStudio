@@ -49,31 +49,6 @@ const operators = [
 
 const joinTypes = ["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "FULL OUTER JOIN"];
 
-// const mockTables = ["users", "orders", "products", "categories", "reviews"];
-
-// const mockColumns: { [key: string]: Column[] } = {
-//   users: [
-//     { name: "id", type: "integer", selected: false },
-//     { name: "name", type: "varchar", selected: false },
-//     { name: "email", type: "varchar", selected: false },
-//     { name: "created_at", type: "timestamp", selected: false },
-//     { name: "active", type: "boolean", selected: false },
-//   ],
-//   orders: [
-//     { name: "id", type: "integer", selected: false },
-//     { name: "user_id", type: "integer", selected: false },
-//     { name: "total", type: "numeric", selected: false },
-//     { name: "status", type: "varchar", selected: false },
-//     { name: "created_at", type: "timestamp", selected: false },
-//   ],
-//   products: [
-//     { name: "id", type: "integer", selected: false },
-//     { name: "name", type: "varchar", selected: false },
-//     { name: "price", type: "numeric", selected: false },
-//     { name: "category_id", type: "integer", selected: false },
-//   ],
-// };
-
 function QueryBuilderTab() {
   const {
     dbMetadata,

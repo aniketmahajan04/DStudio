@@ -511,6 +511,49 @@ async function updateSavedQuery(
   }
 }
 
+async function getQueryHistory(
+  connectionId: string,
+  limit: 30,
+): Promise<{
+  success: boolean;
+  data?: Array<{
+    id: string;
+    sqlQuery: string;
+    status: "SUCCESS" | "FAILED";
+    executedTime: number;
+    errorMessage: string | null;
+    createdAt: Date;
+  }>;
+  error?: string;
+}> {
+  try {
+    const session = await auth.api.getSession();
+    if (!session?.user.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const histories = await prisma.history.findMany({
+      where: {
+        connectionId,
+        connection: {
+          userId: session.user.id,
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+
+    return {
+      success: true,
+      data: histories,
+    };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to fetch query history";
+    return { success: false, error: message };
+  }
+}
+
 export {
   testConnectionToDatabase,
   saveConnectionAndFetchMetadata,
@@ -521,4 +564,5 @@ export {
   getSavedQueries,
   deleteSavedQuery,
   updateSavedQuery,
+  getQueryHistory,
 };
