@@ -102,16 +102,13 @@ function DdlTab() {
   }
   return (
     <div className="flex-1 h-full flex flex-col bg-background overflow-hidden">
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left panel - Results */}
-        <div className="flex-1 flex flex-col border-r overflow-hidden">
-          {/* Results */}
-          <div className="border-b px-4 py-3 bg-accent/20">
+      <div className="flex-1 min-h-0 flex overflow-hidden">
+        {/* Left panel - Results (scrollable) */}
+        <div className="flex-1 min-h-0 flex flex-col border-r overflow-hidden">
+          <div className="shrink-0 border-b px-4 py-3 bg-accent/20">
             <h3 className="text-sm font-medium">Results</h3>
           </div>
-
-          {/* Results Content */}
-          <div className="flex-1 overflow-auto p-4">
+          <div className="flex-1 min-h-0 overflow-auto p-4">
             {queryResult ? (
               queryResult.error ? (
                 // Error Display
@@ -144,11 +141,11 @@ function DdlTab() {
                 </div>
               ) : queryResult.rows && queryResult.rows.length > 0 ? (
                 // Table Results
-                <div>
+                <div className="flex flex-col h-full overflow-auto">
                   <div className="mb-4 text-sm text-muted-foreground">
                     {queryResult.rowCount} rows * {queryResult.executionTime}ms
                   </div>
-                  <div className="border rounded-lg overflow-auto">
+                  <div className="flex-1 border rounded-lg overflow-auto">
                     <table className="w-full text-sm">
                       <thead className="bg-accent sticky top-0">
                         <tr>

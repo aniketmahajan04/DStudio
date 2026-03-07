@@ -2,8 +2,7 @@
 import { ScrollArea } from "../ui/scroll-area";
 import { QueryHistoryCard } from "./query-history-card";
 import { Button } from "../ui/button";
-import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useConnectionStore } from "@/store/useConnectionStore";
 import { RefreshCw } from "lucide-react";
 import { getQueryHistory } from "@/app/api/actions/database-actions";
@@ -21,13 +20,7 @@ function QueryHistoryList() {
   const { activeConnectionId, lastQueryTime } = useConnectionStore();
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (activeConnectionId) {
-      loadQueryHistory();
-    }
-  }, [activeConnectionId, lastQueryTime]);
-
-  const loadQueryHistory = async () => {
+  const loadQueryHistory = useCallback(async () => {
     if (!activeConnectionId) return;
 
     setIsLoading(true);
@@ -38,12 +31,21 @@ function QueryHistoryList() {
       } else if (!result.success) {
         console.error("Failed to load query history:", result.error);
       }
-    } catch (error: any) {
-      console.log("Failed to load query history", error.message);
+    } catch (error: unknown) {
+      console.log(
+        "Failed to load query history",
+        error instanceof Error ? error.message : String(error),
+      );
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [activeConnectionId]);
+
+  useEffect(() => {
+    if (activeConnectionId) {
+      loadQueryHistory();
+    }
+  }, [activeConnectionId, lastQueryTime, loadQueryHistory]);
 
   const handleClearAll = async () => {
     if (!confirm("Are you sure you want to clear all query history?")) return;
@@ -63,8 +65,8 @@ function QueryHistoryList() {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center px-4 py-4 border-b">
+    <div className="flex flex-col h-full overflow-hidden ">
+      <div className="flex justify-between items-center px-4 py-4 border-bshrink-0">
         <h3 className="text-sx uppercase text-muted-foreground tracking-wider">
           Recent queries
         </h3>
@@ -78,8 +80,8 @@ function QueryHistoryList() {
         </Button>
       </div>
 
-      <ScrollArea className="flex-1">
-        <div className="w-72 flex flex-col">
+      <ScrollArea className="flex-1 min-h-0">
+        <div className="flex flex-col">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />

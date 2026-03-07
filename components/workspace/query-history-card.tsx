@@ -33,7 +33,7 @@ function QueryHistoryCard({ history }: { history: QueryHistory }) {
   };
 
   return (
-    <Card key={history.id} className={cn("font-poppins mb-4 ml-4")}>
+    <Card key={history.id} className={cn("font-poppins mb-4 ml-4 mr-4")}>
       <CardHeader
         className={cn("flex flex-row justify-between items-center py-4 px-4")}
       >
