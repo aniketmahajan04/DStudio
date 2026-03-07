@@ -1,7 +1,6 @@
 "use client";
 import { SavedQueryList } from "./saved-query-list";
 import { QueryHistoryList } from "./query-history-list";
-import { mockHistory } from "@/app/mock-data/mock-history-data";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { ConnectionWrapper } from "./connection-wrapper";
 
@@ -19,9 +18,7 @@ function WorkspaceBar() {
         />
       )}
 
-      {activeWorkspace === "history" && (
-        <QueryHistoryList histories={mockHistory} onRun={undefined} />
-      )}
+      {activeWorkspace === "history" && <QueryHistoryList />}
     </div>
   );
 }

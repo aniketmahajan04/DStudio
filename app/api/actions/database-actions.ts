@@ -527,7 +527,9 @@ async function getQueryHistory(
   error?: string;
 }> {
   try {
-    const session = await auth.api.getSession();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
     if (!session?.user.id) {
       return { success: false, error: "Unauthorized" };
     }

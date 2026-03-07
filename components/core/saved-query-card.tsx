@@ -10,7 +10,6 @@ import { EllipsisVertical, FileText, Trash2, Copy } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { SavedQuery } from "../workspace/saved-query-list";
-import { useConnectionStore } from "@/store/useConnectionStore";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -87,7 +86,7 @@ function SavedQueryCard({
     <Card
       key={query.id}
       className={cn(
-        "font-poppins ml-4 mb-4 cursor-pointer transition-colors hover:bg-accent/50",
+        "font-poppins ml-4 mt-4 mb-4 cursor-pointer transition-colors hover:bg-accent/50",
         selected && "bg-accent border-primary",
       )}
       onClick={onSelect}
