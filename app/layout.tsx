@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${poppins.variable} antialiased flex flex-col min-h-screen overflow-hidden`}
+        className={`${poppins.variable} antialiased flex flex-col min-h-screen`}
       >
         <ThemeProvider
           attribute="class"

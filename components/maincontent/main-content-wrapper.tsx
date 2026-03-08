@@ -11,7 +11,7 @@ function MainContentWrapper() {
   );
 
   return (
-    <div className="flex-1 min-h-0">
+    <div className="flex-1 h-full min-h-0">
       {activeMainContentArea === "Data Explorer" && <DataExplorerTab />}
 
       {activeMainContentArea === "Schema Visualizer" && <SchemaVisualizerTab />}

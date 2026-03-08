@@ -41,10 +41,10 @@ export default async function DashboardPage() {
 
         {/* Main Content Area - beside workspace-bar */}
 
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-hidden min-h-0">
           {/* Editor, results, etc. */}
 
-          <div className="h-full bg-muted/20 flex flex-col">
+          <div className="h-full min-h-0 bg-muted/20 flex flex-col">
             <MainContentBar />
             {/* <p className="text-muted-foreground">Main Content Area</p> */}
             <MainContentWrapper />
