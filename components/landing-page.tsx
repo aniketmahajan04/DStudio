@@ -13,7 +13,6 @@ import Image from "next/image";
 import heroImage from "@/app/public/hero.png";
 
 function LandingPage() {
-  // const openSignInModal = useAuthStore((state) => state.openSignInModal);
   const features = [
     {
       icon: Database,
