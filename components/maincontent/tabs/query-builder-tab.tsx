@@ -68,11 +68,6 @@ function QueryBuilderTab() {
   const [isExecuting, setIsExecuting] = useState(false);
   const [queryResult, setQueryResult] = useState<any>(null);
 
-  // const availableTables =
-  //   dbMetadata?.schemas
-  //     .find((s) => s.name === selectedSchema)
-  //     ?.tables.map((t) => t.name) || [];
-
   const availableTables = useMemo(() => {
     const schema = dbMetadata?.schemas.find((s) => s.name === selectedSchema);
 

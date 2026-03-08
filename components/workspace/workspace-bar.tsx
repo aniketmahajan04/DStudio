@@ -7,7 +7,7 @@ import { ConnectionWrapper } from "./connection-wrapper";
 function WorkspaceBar() {
   const activeWorkspace = useWorkspaceStore((state) => state.activeWorkspace);
   return (
-    <div className="w-76 flex flex-col border-r border-border bg-background shrink-0 min-h-[90vh]">
+    <div className="w-76 flex flex-col border-r border-border bg-background shrink-0 h-[90vh]">
       {activeWorkspace === "connections" && <ConnectionWrapper />}
 
       {activeWorkspace === "saved" && (

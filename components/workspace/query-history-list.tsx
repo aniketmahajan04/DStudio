@@ -65,8 +65,8 @@ function QueryHistoryList() {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden ">
-      <div className="flex justify-between items-center px-4 py-4 border-bshrink-0">
+    <div className="flex flex-col h-full">
+      <div className="flex justify-between items-center px-4 py-4 border-b mb-4 shrink-0">
         <h3 className="text-sx uppercase text-muted-foreground tracking-wider">
           Recent queries
         </h3>
