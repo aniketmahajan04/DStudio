@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { motion, scale, useMotionValue, useTransform } from "motion/react";
+import { motion, useMotionValue, useTransform } from "motion/react";
 import { useTheme } from "next-themes";
 
 export default function ThemeToggle({ className }: { className?: string }) {
