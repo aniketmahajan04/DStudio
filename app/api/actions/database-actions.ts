@@ -42,8 +42,10 @@ async function testConnectionToDatabase(config: ConnectionConfig) {
     }
 
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to test connection";
+    return { success: false, error: message };
   }
 }
 
@@ -121,9 +123,12 @@ async function saveConnectionAndFetchMetadata(
         tableDetails,
       },
     };
-  } catch (err: any) {
-    console.error("Save connection error:", err);
-    return { success: false, error: err.message };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to save connection and fetch metadata";
+    return { success: false, error: message };
   }
 }
 
@@ -195,8 +200,12 @@ async function connectToSavedConnection(connectionId: string): Promise<{
         tableDetails,
       },
     };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to connect to save connection";
+    return { success: false, error: message };
   }
 }
 
@@ -257,8 +266,10 @@ async function fetchTableData(
       success: true,
       data: result,
     };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to Fetch table data";
+    return { success: false, error: message };
   }
 }
 
@@ -406,8 +417,10 @@ async function saveQuery(
       success: true,
       data: { id: savedQuery.id },
     };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to save query";
+    return { success: false, error: message };
   }
 }
 
@@ -450,8 +463,10 @@ async function getSavedQueries(): Promise<{
         dbType: mapDbType(q.dbType),
       })),
     };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to get saved queries";
+    return { success: false, error: message };
   }
 }
 
@@ -475,8 +490,10 @@ async function deleteSavedQuery(
     });
 
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to delete saved query";
+    return { success: false, error: message };
   }
 }
 
@@ -506,8 +523,10 @@ async function updateSavedQuery(
     });
 
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to update saved query";
+    return { success: false, error: message };
   }
 }
 
