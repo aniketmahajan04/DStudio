@@ -145,6 +145,13 @@ interface MetadataFetchProgress {
   totalTables?: number;
 }
 
+interface SavedConnection {
+  id: string;
+  connectionName: string;
+  type: DatabaseType;
+  createdAt: Date;
+}
+
 export type {
   DatabaseType,
   ColumnMetaData,
@@ -165,4 +172,5 @@ export type {
   ActionResponse,
   ConnectionTestResult,
   MetadataFetchProgress,
+  SavedConnection,
 };

@@ -631,6 +631,58 @@ async function refreshTableMetadata(
   }
 }
 
+async function getUserConnections(): Promise<{
+  success: boolean;
+  data?: Array<{
+    id: string;
+    connectionName: string;
+    type: DatabaseType;
+    createdAt: Date;
+  }>;
+  error?: string;
+}> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const connections = await prisma.connection.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      select: {
+        id: true,
+        connectionName: true,
+        type: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return {
+      success: true,
+      data: connections.map((conn) => ({
+        id: conn.id,
+        connectionName: conn.connectionName,
+        type: conn.type.toLowerCase() as "postgresql" | "mysql" | "sqlite",
+        createdAt: conn.createdAt,
+      })),
+    };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch user connections";
+    return { success: false, error: message };
+  }
+}
+
 export {
   testConnectionToDatabase,
   saveConnectionAndFetchMetadata,
@@ -643,4 +695,5 @@ export {
   updateSavedQuery,
   getQueryHistory,
   refreshTableMetadata,
+  getUserConnections,
 };
