@@ -24,6 +24,7 @@ function Connections() {
   );
   const [expandedTables, setExpandedTables] = useState<Set<string>>(new Set());
   const [isReconnecting, setIsReconnecting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const {
     dbMetadata,
@@ -34,6 +35,65 @@ function Connections() {
     setActiveConnection,
     setIsConnecting,
   } = useConnectionStore();
+
+  const handleRefreshConnection = async () => {
+    if (!activeConnectionId || isRefreshing || isReconnecting) return;
+
+    const previousSelectedTable = useConnectionStore.getState().selectedTable;
+
+    setIsRefreshing(true);
+    setIsConnecting(true);
+    toastManager.add({
+      title: "Refreshing...",
+      type: "info",
+      description: "Reloading database metadata",
+    });
+
+    try {
+      const result = await connectToSavedConnection(activeConnectionId);
+
+      if (result.success && result.data) {
+        const { connectionName, metadata, tableDetails } = result.data;
+        setActiveConnection(
+          activeConnectionId,
+          connectionName,
+          metadata,
+          tableDetails,
+        );
+
+        if (previousSelectedTable) {
+          const refreshedTables = useConnectionStore.getState().tables;
+          if (refreshedTables[previousSelectedTable]) {
+            useConnectionStore.setState({ selectedTable: previousSelectedTable });
+          }
+        }
+
+        toastManager.add({
+          title: "Refreshed",
+          type: "success",
+          description: "Database metadata updated",
+        });
+      } else {
+        toastManager.add({
+          title: "Refresh Failed",
+          type: "error",
+          description: result.error || "Failed to refresh connection",
+        });
+      }
+    } catch (error: unknown) {
+      toastManager.add({
+        title: "Refresh Failed",
+        type: "error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to refresh connection",
+      });
+    } finally {
+      setIsRefreshing(false);
+      setIsConnecting(false);
+    }
+  };
 
   useEffect(() => {
     const reconnect = async () => {
@@ -61,12 +121,13 @@ function Connections() {
               description: result.error || "Failed to reconnect",
             });
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           useConnectionStore.getState().clearSession();
           toastManager.add({
             title: "Reconnection Failed",
             type: "error",
-            description: error.message,
+            description:
+              error instanceof Error ? error.message : "Reconnection failed",
           });
         } finally {
           setIsReconnecting(false);
@@ -301,16 +362,11 @@ function Connections() {
           <Button
             className="py-4"
             variant="outline"
-            onClick={() =>
-              toastManager.add({
-                title: "Refreshing...",
-                type: "info",
-                description: "Reloading database metadata",
-              })
-            }
+            onClick={handleRefreshConnection}
+            disabled={isRefreshing}
           >
-            <RefreshCw />
-            Refresh
+            <RefreshCw className={cn(isRefreshing && "animate-spin")} />
+            {isRefreshing ? "Refreshing" : "Refresh"}
           </Button>
         )}
       </div>

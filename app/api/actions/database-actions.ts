@@ -556,6 +556,62 @@ async function getQueryHistory(
   }
 }
 
+async function refreshTableMetadata(
+  connectionId: string,
+  schema: string,
+  tableName: string,
+): Promise<{
+  success: boolean;
+  data?: TableMetaData;
+  error?: string;
+}> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const connection = await prisma.connection.findFirst({
+      where: {
+        id: connectionId,
+        userId: session.user.id,
+      },
+    });
+
+    if (!connection) {
+      return { success: false, error: "Connection not found" };
+    }
+
+    const connectionUrl = decryptConnectionUrl(
+      connection.connectionUrl,
+      connection.iv,
+    );
+
+    const config: ConnectionConfig = {
+      type: mapDbType(connection.type),
+      connectionString: connectionUrl,
+    };
+
+    const adapter = new PostgreSQLAdapter(config);
+
+    const tableMetaData = await adapter.getTableSchema(schema, tableName);
+
+    return {
+      success: true,
+      data: tableMetaData,
+    };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to refresh table metadata";
+    return { success: false, error: message };
+  }
+}
+
 export {
   testConnectionToDatabase,
   saveConnectionAndFetchMetadata,
@@ -567,4 +623,5 @@ export {
   deleteSavedQuery,
   updateSavedQuery,
   getQueryHistory,
+  refreshTableMetadata,
 };
