@@ -3,6 +3,7 @@ import { SavedQueryList } from "./saved-query-list";
 import { QueryHistoryList } from "./query-history-list";
 import { useWorkspaceStore } from "@/store/workspaceStore";
 import { ConnectionWrapper } from "./connection-wrapper";
+import { ConnectionHistoryList } from "./connection-history-list";
 
 function WorkspaceBar() {
   const activeWorkspace = useWorkspaceStore((state) => state.activeWorkspace);
@@ -10,7 +11,7 @@ function WorkspaceBar() {
     <div className="w-76 flex flex-col border-r border-border bg-background shrink-0 h-[90vh]">
       {activeWorkspace === "connections" && <ConnectionWrapper />}
 
-      {activeWorkspace === "saved" && (
+      {activeWorkspace === "saved queries" && (
         <SavedQueryList
           onQuerySelect={(query) => {
             console.log("selected:", query.sqlQuery);
@@ -19,6 +20,8 @@ function WorkspaceBar() {
       )}
 
       {activeWorkspace === "history" && <QueryHistoryList />}
+
+      {activeWorkspace === "recent connection" && <ConnectionHistoryList />}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { RefreshCw } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
+import { ConnectionHistoryCard } from "./connection-history-card";
 
 function ConnectionHistoryList({
   onConnectionSelect,
@@ -27,8 +28,9 @@ function ConnectionHistoryList({
       if (result.success && result.data) {
         setConnections(result.data);
       }
-    } catch (error: any) {
-      console.error("Failed to load connections:", error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error && error.message;
+      console.error("Failed to load connections:", message);
     } finally {
       setIsLoading(false);
     }
@@ -89,3 +91,5 @@ function ConnectionHistoryList({
     </div>
   );
 }
+
+export { ConnectionHistoryList };

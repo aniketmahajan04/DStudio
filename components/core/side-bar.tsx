@@ -1,5 +1,5 @@
 "use client";
-import { Database, History, Save, Settings } from "lucide-react";
+import { Cable, Database, History, Save, Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -48,13 +48,13 @@ export default function SideBar() {
               <Button
                 variant={activeWorkspace ? "default" : "ghost"}
                 className={cn("py-4 rounded-lg")}
-                onClick={() => setActiveWorkspace("saved")}
+                onClick={() => setActiveWorkspace("saved queries")}
               >
                 <Save strokeWidth={2.5} />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right">
-              <p>Save</p>
+              <p>Save Query</p>
             </TooltipContent>
           </Tooltip>
 
@@ -69,7 +69,22 @@ export default function SideBar() {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right">
-              <p>History</p>
+              <p>Query History</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                variant={activeWorkspace ? "default" : "ghost"}
+                className={cn("py-4")}
+                onClick={() => setActiveWorkspace("recent connection")}
+              >
+                <Cable strokeWidth={2.5} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>Recent Connections</p>
             </TooltipContent>
           </Tooltip>
         </div>

@@ -4,10 +4,26 @@ import { SavedConnection } from "@/lib/database/types";
 import { useConnectionStore } from "@/store/useConnectionStore";
 import { useState } from "react";
 import { toastManager } from "../ui/toast";
-import { connectToSavedConnection } from "@/app/api/actions/database-actions";
+import {
+  connectToSavedConnection,
+  deleteConnection,
+} from "@/app/api/actions/database-actions";
 import { cn } from "@/lib/utils";
-import { Card, CardHeader, CardTitle } from "../ui/card";
-import { Database } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Database, EllipsisVertical, Power, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/menu";
+import { Button } from "../ui/button";
 
 function ConnectionHistoryCard({
   connection,
@@ -79,11 +95,13 @@ function ConnectionHistoryCard({
           description: result.error || "Failed to connect",
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to connect ";
       toastManager.add({
         title: "Error",
         type: "error",
-        description: error.message,
+        description: message,
       });
     } finally {
       setIsConnecting(false);
@@ -113,11 +131,13 @@ function ConnectionHistoryCard({
       } else {
         throw new Error(result.error || "Failed to delete connection");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to delete connection";
       toastManager.add({
         title: "Delete Failed",
         type: "error",
-        description: error.message,
+        description: message,
       });
     } finally {
       setIsDeleting(false);
@@ -130,7 +150,7 @@ function ConnectionHistoryCard({
     <Card
       onClick={onSelect}
       className={cn(
-        "font-poppins mb-4 ml-4 mr-4 cursor-pointer transition-colors hover:bg-accent/50",
+        "font-poppins m-4 cursor-pointer transition-colors hover:bg-accent/50",
         selected && "bg-accent border-primary",
         isActive && "border-muted-foreground",
       )}
@@ -144,7 +164,62 @@ function ConnectionHistoryCard({
             {connection.connectionName}
           </CardTitle>
         </div>
+
+        {isActive && (
+          <div className="px-2 py-0.5 text-[10px] bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-sm">
+            Active
+          </div>
+        )}
+
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 hover:bg-accent ml-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={handleDelete}
+              disabled={isDeleting || isActive}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              {isDeleting ? "Deleting..." : "Delete"}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </CardHeader>
+
+      <CardContent className="px-4 py-4">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">
+            {getDbLabel(connection.type)}
+          </span>
+        </div>
+      </CardContent>
+
+      <CardFooter className="flex justify-between items-center pb-3 px-4">
+        <span className="text-muted-foreground/60 text-xs">
+          {formatDate(connection.createdAt)}
+        </span>
+        {!isActive && (
+          <Button
+            size="sm"
+            variant="default"
+            onClick={handleConnect}
+            disabled={isConnecting}
+            className="rounded-sm h-7 text-xs px-3"
+          >
+            <Power className="w-3 h-3 mr-1.5" />
+            {isConnecting ? "Connecting..." : "Connect"}
+          </Button>
+        )}
+      </CardFooter>
     </Card>
   );
 }

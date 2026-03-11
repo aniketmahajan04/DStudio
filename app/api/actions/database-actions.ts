@@ -683,6 +683,33 @@ async function getUserConnections(): Promise<{
   }
 }
 
+async function deleteConnection(
+  connectionId: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    await prisma.connection.delete({
+      where: {
+        id: connectionId,
+        userId: session.user.id,
+      },
+    });
+
+    return { success: true };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to delete connection";
+    return { success: false, error: message };
+  }
+}
+
 export {
   testConnectionToDatabase,
   saveConnectionAndFetchMetadata,
@@ -696,4 +723,5 @@ export {
   getQueryHistory,
   refreshTableMetadata,
   getUserConnections,
+  deleteConnection,
 };

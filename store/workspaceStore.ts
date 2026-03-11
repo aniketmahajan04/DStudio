@@ -1,6 +1,10 @@
 import { create } from "zustand";
 
-type WorkspaceType = "connections" | "saved" | "history";
+type WorkspaceType =
+  | "connections"
+  | "saved queries"
+  | "history"
+  | "recent connection";
 
 interface WorkspaceStore {
   activeWorkspace: WorkspaceType;
